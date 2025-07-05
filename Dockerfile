@@ -34,5 +34,14 @@ RUN pnpm run build
 # Override the default entrypoint
 ENTRYPOINT ["/bin/sh", "-c"]
 
-# Start Ollama service and pull the model, then run the app
-CMD ["ollama serve & sleep 5 && ollama pull ${MODEL_NAME_AT_ENDPOINT} && node .mastra/output/index.mjs"]
+# Start Ollama service with proper health check and wait for it to be ready
+CMD ["ollama serve & \
+  echo 'Waiting for Ollama to be ready...' && \
+  while ! curl -s http://127.0.0.1:11434/api/tags >/dev/null 2>&1; do \
+    echo 'Ollama not ready yet, waiting 2 seconds...' && \
+    sleep 2; \
+  done && \
+  echo 'Ollama is ready! Pulling model...' && \
+  ollama pull ${MODEL_NAME_AT_ENDPOINT} && \
+  echo 'Starting Node.js application...' && \
+  node .mastra/output/index.mjs"]

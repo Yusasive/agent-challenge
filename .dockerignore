@@ -9,9 +9,11 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 
-# Environment files
+# Environment files (security)
+.env
 .env.local
 .env.*.local
+.env.example
 
 # Build output
 .mastra/
@@ -29,9 +31,10 @@ build/
 .DS_Store
 Thumbs.db
 
-# Documentation
+# Documentation (reduce image size)
 *.md
 LICENSE
+docs/
 
 # Docker
 Dockerfile
@@ -42,8 +45,26 @@ Dockerfile
 *.temp
 .cache/
 
-# Test files
+# Test files (not needed in production)
+tests/
 coverage/
 .nyc_output/
 *.test.js
 *.spec.js
+*.test.ts
+*.spec.ts
+
+# Development tools
+.eslintrc*
+.prettierrc*
+biome.json
+tsconfig.json
+
+# Security files (never include in image)
+SECURITY.md
+.env.example
+
+# Large assets (if any)
+assets/
+screenshots/
+demos/

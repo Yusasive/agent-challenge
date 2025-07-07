@@ -26,9 +26,9 @@ export const maxRequestsPerMinute = parseInt(process.env.MAX_REQUESTS_PER_MINUTE
 export const logLevel = process.env.LOG_LEVEL ?? 'info';
 export const nodeEnv = process.env.NODE_ENV ?? 'development';
 
-// Timeout configuration - increased for complex analysis
-export const requestTimeout = parseInt(process.env.REQUEST_TIMEOUT ?? '120000', 10); // 2 minutes
-export const modelTimeout = parseInt(process.env.MODEL_TIMEOUT ?? '90000', 10); // 1.5 minutes
+// Timeout configuration - reduced for better responsiveness
+export const requestTimeout = parseInt(process.env.REQUEST_TIMEOUT ?? '60000', 10); // 1 minute
+export const modelTimeout = parseInt(process.env.MODEL_TIMEOUT ?? '45000', 10); // 45 seconds
 
 // Validate configuration
 if (isNaN(maxRequestsPerMinute) || maxRequestsPerMinute <= 0) {
@@ -39,71 +39,137 @@ if (isNaN(requestTimeout) || requestTimeout <= 0) {
   throw new Error('REQUEST_TIMEOUT must be a positive number');
 }
 
-// Create and export the model instance with improved error handling and timeouts
+// Function to check if Ollama is running
+const checkOllamaHealth = async (): Promise<boolean> => {
+  try {
+    const healthUrl = baseURL.replace('/api', '') + '/api/tags';
+    const response = await fetch(healthUrl, { 
+      method: 'GET',
+      signal: AbortSignal.timeout(5000) // 5 second timeout for health check
+    });
+    return response.ok;
+  } catch (error) {
+    console.error('Ollama health check failed:', error instanceof Error ? error.message : 'Unknown error');
+    return false;
+  }
+};
+
+// Function to check if model is available
+const checkModelAvailability = async (): Promise<boolean> => {
+  try {
+    const modelsUrl = baseURL.replace('/api', '') + '/api/tags';
+    const response = await fetch(modelsUrl, { 
+      method: 'GET',
+      signal: AbortSignal.timeout(5000)
+    });
+    
+    if (!response.ok) return false;
+    
+    const data = await response.json();
+    const availableModels = data.models || [];
+    const modelExists = availableModels.some((model: any) => 
+      model.name === modelName || model.name.startsWith(modelName.split(':')[0])
+    );
+    
+    if (!modelExists) {
+      console.warn(`Model ${modelName} not found. Available models:`, 
+        availableModels.map((m: any) => m.name).join(', '));
+    }
+    
+    return modelExists;
+  } catch (error) {
+    console.error('Model availability check failed:', error instanceof Error ? error.message : 'Unknown error');
+    return false;
+  }
+};
+
+// Create and export the model instance with improved error handling
 let model: LanguageModelV1;
-try {
-  const ollamaProvider = createOllama({ 
-    baseURL,
-    // Enhanced fetch with proper timeout and retry logic
-    fetch: async (url, options) => {
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => {
-        console.log(`Request timeout after ${modelTimeout}ms for URL: ${url}`);
-        controller.abort();
-      }, modelTimeout);
-      
-      let lastError: Error | unknown;
-      const maxRetries = 3;
-      
-      for (let attempt = 1; attempt <= maxRetries; attempt++) {
+
+const initializeModel = async () => {
+  try {
+    // Check Ollama health first
+    console.log('Checking Ollama connection...');
+    const isHealthy = await checkOllamaHealth();
+    
+    if (!isHealthy) {
+      throw new Error(`Ollama is not running or not accessible at ${baseURL}. Please start Ollama first.`);
+    }
+    
+    console.log('✅ Ollama is running');
+    
+    // Check if model is available
+    console.log(`Checking if model ${modelName} is available...`);
+    const modelAvailable = await checkModelAvailability();
+    
+    if (!modelAvailable) {
+      console.warn(`⚠️  Model ${modelName} not found. Attempting to pull...`);
+      // Note: We can't pull the model from here, user needs to do it manually
+    }
+
+    const ollamaProvider = createOllama({ 
+      baseURL,
+      // Simplified fetch with better error handling
+      fetch: async (url, options) => {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => {
+          console.log(`⏰ Request timeout after ${modelTimeout}ms for ${url}`);
+          controller.abort();
+        }, modelTimeout);
+        
         try {
-          console.log(`Attempt ${attempt}/${maxRetries} for ${url}`);
-          
           const response = await fetch(url, {
             ...options,
             signal: controller.signal,
             headers: {
-              ...options?.headers,
               'Content-Type': 'application/json',
+              ...options?.headers,
             },
           });
           
           clearTimeout(timeoutId);
           
           if (!response.ok) {
-            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            const errorText = await response.text().catch(() => 'Unknown error');
+            throw new Error(`HTTP ${response.status}: ${errorText}`);
           }
           
           return response;
         } catch (error) {
-          lastError = error;
-          console.warn(`Attempt ${attempt} failed:`, error instanceof Error ? error.message : 'Unknown error');
+          clearTimeout(timeoutId);
           
-          if (attempt < maxRetries) {
-            // Exponential backoff: 1s, 2s, 4s
-            const delay = Math.pow(2, attempt - 1) * 1000;
-            console.log(`Retrying in ${delay}ms...`);
-            await new Promise(resolve => setTimeout(resolve, delay));
+          if (error instanceof Error) {
+            if (error.name === 'AbortError') {
+              throw new Error(`Request timed out after ${modelTimeout}ms. The model might be too large or Ollama is overloaded.`);
+            }
+            throw error;
           }
+          throw new Error('Unknown fetch error');
         }
       }
-      
-      clearTimeout(timeoutId);
-      throw new Error(`Failed after ${maxRetries} attempts. Last error: ${lastError instanceof Error ? lastError.message : 'Unknown error'}`);
-    }
-  });
+    });
 
-  // Create the chat model with proper settings
-  model = ollamaProvider.chat(modelName, {
-    simulateStreaming: true,
-    // Remove unsupported properties and use only valid ones
-  });
+    // Create the chat model with minimal settings
+    model = ollamaProvider.chat(modelName);
+    
+    console.log('✅ Model initialized successfully');
+    
+  } catch (error) {
+    console.error('❌ Failed to initialize model:', error);
+    throw new Error(`Model initialization failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+  }
+};
+
+// Initialize model synchronously for now, but provide better error messages
+try {
+  const ollamaProvider = createOllama({ baseURL });
+  model = ollamaProvider.chat(modelName);
 } catch (error) {
   console.error('Failed to initialize model:', error);
   throw new Error(`Model initialization failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
 }
 
-export { model };
+export { model, initializeModel, checkOllamaHealth, checkModelAvailability };
 
 // Log configuration (without sensitive data)
 console.log(`Configuration loaded:`);

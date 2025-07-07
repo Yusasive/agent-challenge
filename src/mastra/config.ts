@@ -25,35 +25,76 @@ export const maxRequestsPerMinute = parseInt(process.env.MAX_REQUESTS_PER_MINUTE
 export const logLevel = process.env.LOG_LEVEL ?? 'info';
 export const nodeEnv = process.env.NODE_ENV ?? 'development';
 
+// Timeout configuration - increased for complex analysis
+export const requestTimeout = parseInt(process.env.REQUEST_TIMEOUT ?? '120000', 10); // 2 minutes
+export const modelTimeout = parseInt(process.env.MODEL_TIMEOUT ?? '90000', 10); // 1.5 minutes
+
 // Validate configuration
 if (isNaN(maxRequestsPerMinute) || maxRequestsPerMinute <= 0) {
   throw new Error('MAX_REQUESTS_PER_MINUTE must be a positive number');
 }
 
-// Create and export the model instance with error handling
+if (isNaN(requestTimeout) || requestTimeout <= 0) {
+  throw new Error('REQUEST_TIMEOUT must be a positive number');
+}
+
+// Create and export the model instance with improved error handling and timeouts
 let model;
 try {
   model = createOllama({ 
     baseURL,
-    // Add timeout and retry configuration for production
+    // Enhanced fetch with proper timeout and retry logic
     fetch: async (url, options) => {
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 30000); // 30s timeout
+      const timeoutId = setTimeout(() => {
+        console.log(`Request timeout after ${modelTimeout}ms for URL: ${url}`);
+        controller.abort();
+      }, modelTimeout);
       
-      try {
-        const response = await fetch(url, {
-          ...options,
-          signal: controller.signal,
-        });
-        clearTimeout(timeoutId);
-        return response;
-      } catch (error) {
-        clearTimeout(timeoutId);
-        throw error;
+      let lastError;
+      const maxRetries = 3;
+      
+      for (let attempt = 1; attempt <= maxRetries; attempt++) {
+        try {
+          console.log(`Attempt ${attempt}/${maxRetries} for ${url}`);
+          
+          const response = await fetch(url, {
+            ...options,
+            signal: controller.signal,
+            headers: {
+              ...options?.headers,
+              'Content-Type': 'application/json',
+            },
+          });
+          
+          clearTimeout(timeoutId);
+          
+          if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+          }
+          
+          return response;
+        } catch (error) {
+          lastError = error;
+          console.warn(`Attempt ${attempt} failed:`, error instanceof Error ? error.message : 'Unknown error');
+          
+          if (attempt < maxRetries) {
+            // Exponential backoff: 1s, 2s, 4s
+            const delay = Math.pow(2, attempt - 1) * 1000;
+            console.log(`Retrying in ${delay}ms...`);
+            await new Promise(resolve => setTimeout(resolve, delay));
+          }
+        }
       }
+      
+      clearTimeout(timeoutId);
+      throw new Error(`Failed after ${maxRetries} attempts. Last error: ${lastError instanceof Error ? lastError.message : 'Unknown error'}`);
     }
   }).chat(modelName, {
     simulateStreaming: true,
+    // Add model-specific timeout settings
+    temperature: 0.1, // Lower temperature for more consistent responses
+    maxTokens: 4000, // Reasonable token limit
   });
 } catch (error) {
   console.error('Failed to initialize model:', error);
@@ -68,4 +109,6 @@ console.log(`- Model: ${modelName}`);
 console.log(`- Base URL: ${baseURL.replace(/\/\/.*@/, '//***@')}`); // Hide credentials in URL
 console.log(`- Environment: ${nodeEnv}`);
 console.log(`- Rate Limiting: ${enableRateLimiting ? 'Enabled' : 'Disabled'}`);
+console.log(`- Request Timeout: ${requestTimeout}ms`);
+console.log(`- Model Timeout: ${modelTimeout}ms`);
 console.log(`- Log Level: ${logLevel}`);

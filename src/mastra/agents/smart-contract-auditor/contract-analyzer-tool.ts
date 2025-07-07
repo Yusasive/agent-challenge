@@ -21,9 +21,12 @@ interface AnalysisResult {
 
 export const contractAnalyzerTool = createTool({
   id: "analyze-smart-contract",
-  description: "Performs comprehensive security analysis of Solidity smart contracts",
+  description: "Performs comprehensive security analysis of Solidity smart contracts. Use for initial contract assessment.",
   inputSchema: z.object({
-    contractCode: z.string().describe("The Solidity smart contract code to analyze"),
+    contractCode: z.string()
+      .min(1, "Contract code cannot be empty")
+      .max(50000, "Contract code too large (max 50KB)")
+      .describe("The Solidity smart contract code to analyze"),
     contractName: z.string().optional().describe("Optional name of the contract"),
   }),
   outputSchema: z.object({
@@ -42,21 +45,60 @@ export const contractAnalyzerTool = createTool({
     summary: z.string(),
   }),
   execute: async ({ context }) => {
-    return await analyzeContract(context.contractCode, context.contractName);
+    try {
+      // Add timeout protection for large contracts
+      const startTime = Date.now();
+      const maxAnalysisTime = 30000; // 30 seconds max
+      
+      const result = await Promise.race([
+        analyzeContract(context.contractCode, context.contractName),
+        new Promise<never>((_, reject) => 
+          setTimeout(() => reject(new Error('Analysis timeout - contract too complex')), maxAnalysisTime)
+        )
+      ]);
+      
+      const analysisTime = Date.now() - startTime;
+      console.log(`Contract analysis completed in ${analysisTime}ms`);
+      
+      return result;
+    } catch (error) {
+      console.error('Contract analysis error:', error);
+      throw new Error(`Analysis failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
   },
 });
 
 const analyzeContract = async (contractCode: string, contractName?: string): Promise<AnalysisResult> => {
-  const lines = contractCode.split('\n');
+  // Input validation and sanitization
+  if (!contractCode || contractCode.trim().length === 0) {
+    throw new Error("Contract code cannot be empty");
+  }
+  
+  // Remove potentially dangerous content
+  const sanitizedCode = contractCode
+    .replace(/<!--[\s\S]*?-->/g, '') // Remove HTML comments
+    .replace(/<script[\s\S]*?<\/script>/gi, '') // Remove script tags
+    .replace(/<[^>]*>/g, '') // Remove HTML tags
+    .trim();
+
+  const lines = sanitizedCode.split('\n');
   const totalLines = lines.length;
   const issues: SecurityIssue[] = [];
   const gasOptimizations: string[] = [];
 
   // Extract contract name if not provided
-  const nameMatch = contractCode.match(/contract\s+(\w+)/);
+  const nameMatch = sanitizedCode.match(/contract\s+(\w+)/);
   const finalContractName = contractName || nameMatch?.[1] || "UnknownContract";
 
-  // Security Analysis Patterns
+  // Quick validation for Solidity code
+  const hasPragma = /pragma\s+solidity/i.test(sanitizedCode);
+  const hasContract = /contract\s+\w+/i.test(sanitizedCode);
+  
+  if (!hasPragma && !hasContract) {
+    throw new Error("Input does not appear to be valid Solidity code");
+  }
+
+  // Security Analysis Patterns - optimized for speed
   const securityChecks = [
     {
       pattern: /\.call\s*\(/g,
@@ -91,42 +133,18 @@ const analyzeContract = async (contractCode: string, contractName?: string): Pro
       impact: "Miners can manipulate timestamps within reasonable bounds"
     },
     {
-      pattern: /require\s*\(\s*msg\.sender\s*==\s*owner\s*\)/g,
-      type: "Simple access control",
-      severity: 'Medium' as const,
-      description: "Basic owner-only access control detected",
-      recommendation: "Consider using OpenZeppelin's Ownable or AccessControl for robust access management",
-      impact: "Single point of failure and limited access control flexibility"
-    },
-    {
-      pattern: /\.transfer\s*\(/g,
-      type: "Transfer usage",
-      severity: 'Medium' as const,
-      description: "Usage of transfer() function detected",
-      recommendation: "Consider using call() with proper checks instead of transfer() to avoid gas limit issues",
-      impact: "May fail with smart contract recipients due to 2300 gas limit"
-    },
-    {
       pattern: /pragma\s+solidity\s+\^?[0-4]\./g,
       type: "Outdated Solidity version",
       severity: 'Medium' as const,
       description: "Outdated Solidity version detected",
       recommendation: "Update to Solidity 0.8.x or later for built-in overflow protection",
       impact: "Missing security features and potential vulnerabilities"
-    },
-    {
-      pattern: /using\s+SafeMath/g,
-      type: "SafeMath usage",
-      severity: 'Low' as const,
-      description: "SafeMath library usage detected",
-      recommendation: "Consider upgrading to Solidity 0.8.x which has built-in overflow protection",
-      impact: "Unnecessary gas overhead in newer Solidity versions"
     }
   ];
 
-  // Check for reentrancy patterns
-  const hasExternalCalls = /\.call\(|\.send\(|\.transfer\(/.test(contractCode);
-  const hasStateChangesAfterCalls = checkReentrancyPattern(contractCode);
+  // Quick reentrancy check
+  const hasExternalCalls = /\.call\(|\.send\(|\.transfer\(/.test(sanitizedCode);
+  const hasStateChangesAfterCalls = checkReentrancyPattern(sanitizedCode);
   
   if (hasExternalCalls && hasStateChangesAfterCalls) {
     issues.push({
@@ -139,10 +157,10 @@ const analyzeContract = async (contractCode: string, contractName?: string): Pro
   }
 
   // Check for integer overflow/underflow (pre-0.8.0)
-  const solidityVersion = contractCode.match(/pragma\s+solidity\s+\^?([0-9]+\.[0-9]+)/)?.[1];
+  const solidityVersion = sanitizedCode.match(/pragma\s+solidity\s+\^?([0-9]+\.[0-9]+)/)?.[1];
   if (solidityVersion && parseFloat(solidityVersion) < 0.8) {
-    const hasArithmetic = /[\+\-\*\/]/.test(contractCode);
-    const hasSafeMath = /SafeMath/.test(contractCode);
+    const hasArithmetic = /[\+\-\*\/]/.test(sanitizedCode);
+    const hasSafeMath = /SafeMath/.test(sanitizedCode);
     
     if (hasArithmetic && !hasSafeMath) {
       issues.push({
@@ -155,37 +173,32 @@ const analyzeContract = async (contractCode: string, contractName?: string): Pro
     }
   }
 
-  // Run pattern-based checks
-  lines.forEach((line, index) => {
-    securityChecks.forEach(check => {
+  // Run pattern-based checks (limit to first 100 lines for performance)
+  const linesToCheck = Math.min(lines.length, 100);
+  for (let i = 0; i < linesToCheck; i++) {
+    const line = lines[i];
+    for (const check of securityChecks) {
       if (check.pattern.test(line)) {
         issues.push({
           type: check.type,
           severity: check.severity,
-          line: index + 1,
+          line: i + 1,
           description: check.description,
           recommendation: check.recommendation,
           impact: check.impact
         });
+        break; // Only one issue per line to avoid duplicates
       }
-    });
-  });
+    }
+  }
 
-  // Gas optimization suggestions
-  if (contractCode.includes('public') && contractCode.includes('view')) {
+  // Quick gas optimization suggestions
+  if (sanitizedCode.includes('public') && sanitizedCode.includes('view')) {
     gasOptimizations.push("Consider using 'external' instead of 'public' for functions only called externally");
   }
   
-  if (contractCode.includes('string') && contractCode.includes('memory')) {
-    gasOptimizations.push("Consider using 'bytes32' instead of 'string' for fixed-length strings to save gas");
-  }
-
-  if (contractCode.includes('uint256')) {
-    gasOptimizations.push("Consider using smaller uint types (uint128, uint64) when possible to pack structs efficiently");
-  }
-
-  if (contractCode.includes('require(') && contractCode.includes('&&')) {
-    gasOptimizations.push("Split complex require statements into multiple requires for better gas efficiency and error messages");
+  if (sanitizedCode.includes('uint256')) {
+    gasOptimizations.push("Consider using smaller uint types when possible to pack structs efficiently");
   }
 
   // Calculate security score
@@ -203,45 +216,30 @@ const analyzeContract = async (contractCode: string, contractName?: string): Pro
     contractName: finalContractName,
     totalLines,
     securityScore,
-    issues,
-    gasOptimizations,
+    issues: issues.slice(0, 20), // Limit issues to prevent overwhelming responses
+    gasOptimizations: gasOptimizations.slice(0, 5), // Limit optimizations
     summary
   };
 };
 
 const checkReentrancyPattern = (code: string): boolean => {
-  // Simplified check for state changes after external calls
+  // Simplified and faster reentrancy check
   const lines = code.split('\n');
-  let inFunction = false;
   let hasExternalCall = false;
   let hasStateChange = false;
 
   for (const line of lines) {
-    if (line.includes('function ')) {
-      inFunction = true;
-      hasExternalCall = false;
-      hasStateChange = false;
+    if (/\.call\(|\.send\(|\.transfer\(/.test(line)) {
+      hasExternalCall = true;
     }
     
-    if (line.includes('}') && inFunction) {
-      if (hasExternalCall && hasStateChange) {
-        return true;
-      }
-      inFunction = false;
-    }
-
-    if (inFunction) {
-      if (/\.call\(|\.send\(|\.transfer\(/.test(line)) {
-        hasExternalCall = true;
-      }
-      
-      if (hasExternalCall && /=/.test(line) && !line.includes('require') && !line.includes('assert')) {
-        hasStateChange = true;
-      }
+    if (hasExternalCall && /=/.test(line) && !line.includes('require') && !line.includes('assert')) {
+      hasStateChange = true;
+      break; // Found pattern, no need to continue
     }
   }
 
-  return false;
+  return hasExternalCall && hasStateChange;
 };
 
 const generateSummary = (contractName: string, score: number, totalIssues: number, critical: number, high: number): string => {

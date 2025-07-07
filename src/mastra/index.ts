@@ -5,6 +5,8 @@ import { weatherWorkflow } from "./agents/weather-agent/weather-workflow"; // Th
 import { smartContractAuditorAgent } from "./agents/smart-contract-auditor/auditor-agent";
 import { requestTimeout } from "./config";
 
+console.log('🚀 Initializing Mastra with Smart Contract Auditor Agent...');
+
 export const mastra = new Mastra({
 	workflows: { weatherWorkflow }, // can be deleted later
 	agents: { 
@@ -24,3 +26,7 @@ export const mastra = new Mastra({
 		},
 	},
 });
+
+// Log registered agents for debugging
+console.log('📋 Registered agents:', Object.keys(mastra.agents || {}));
+console.log('📋 Registered workflows:', Object.keys(mastra.workflows || {}));

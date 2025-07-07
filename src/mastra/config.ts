@@ -26,9 +26,9 @@ export const maxRequestsPerMinute = parseInt(process.env.MAX_REQUESTS_PER_MINUTE
 export const logLevel = process.env.LOG_LEVEL ?? 'info';
 export const nodeEnv = process.env.NODE_ENV ?? 'development';
 
-// Timeout configuration - reduced for better responsiveness
-export const requestTimeout = parseInt(process.env.REQUEST_TIMEOUT ?? '60000', 10); // 1 minute
-export const modelTimeout = parseInt(process.env.MODEL_TIMEOUT ?? '45000', 10); // 45 seconds
+// Timeout configuration - optimized for better responsiveness
+export const requestTimeout = parseInt(process.env.REQUEST_TIMEOUT ?? '30000', 10); // 30 seconds
+export const modelTimeout = parseInt(process.env.MODEL_TIMEOUT ?? '25000', 10); // 25 seconds
 
 // Validate configuration
 if (isNaN(maxRequestsPerMinute) || maxRequestsPerMinute <= 0) {
@@ -109,7 +109,7 @@ const initializeModel = async () => {
 
     const ollamaProvider = createOllama({ 
       baseURL,
-      // Simplified fetch with better error handling
+      // Optimized fetch with better timeout handling
       fetch: async (url, options) => {
         const controller = new AbortController();
         const timeoutId = setTimeout(() => {
@@ -149,8 +149,11 @@ const initializeModel = async () => {
       }
     });
 
-    // Create the chat model with minimal settings
-    model = ollamaProvider.chat(modelName);
+    // Create the chat model with optimized settings
+    model = ollamaProvider.chat(modelName, {
+      // Remove temperature and other unsupported options
+      // Keep only basic configuration
+    });
     
     console.log('✅ Model initialized successfully');
     

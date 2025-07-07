@@ -71,7 +71,5 @@ export const smartContractAuditorAgent = new Agent({
     vulnerabilityCheckerTool,
     auditReportGenerator
   },
-  // Add agent-specific timeout and error handling
-  maxSteps: 10, // Limit the number of tool calls to prevent infinite loops
-  maxTokens: 4000, // Reasonable response length
+  // Remove unsupported properties - Mastra handles these internally
 });

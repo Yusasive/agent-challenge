@@ -1,5 +1,6 @@
 import dotenv from "dotenv";
 import { createOllama } from "ollama-ai-provider";
+import type { LanguageModelV1 } from "@ai-sdk/provider";
 
 // Load environment variables once at the beginning
 dotenv.config();
@@ -39,9 +40,9 @@ if (isNaN(requestTimeout) || requestTimeout <= 0) {
 }
 
 // Create and export the model instance with improved error handling and timeouts
-let model;
+let model: LanguageModelV1;
 try {
-  model = createOllama({ 
+  const ollamaProvider = createOllama({ 
     baseURL,
     // Enhanced fetch with proper timeout and retry logic
     fetch: async (url, options) => {
@@ -51,7 +52,7 @@ try {
         controller.abort();
       }, modelTimeout);
       
-      let lastError;
+      let lastError: Error | unknown;
       const maxRetries = 3;
       
       for (let attempt = 1; attempt <= maxRetries; attempt++) {
@@ -90,11 +91,12 @@ try {
       clearTimeout(timeoutId);
       throw new Error(`Failed after ${maxRetries} attempts. Last error: ${lastError instanceof Error ? lastError.message : 'Unknown error'}`);
     }
-  }).chat(modelName, {
+  });
+
+  // Create the chat model with proper settings
+  model = ollamaProvider.chat(modelName, {
     simulateStreaming: true,
-    // Add model-specific timeout settings
-    temperature: 0.1, // Lower temperature for more consistent responses
-    maxTokens: 4000, // Reasonable token limit
+    // Remove unsupported properties and use only valid ones
   });
 } catch (error) {
   console.error('Failed to initialize model:', error);

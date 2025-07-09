@@ -31,10 +31,10 @@ export const logLevel = process.env.LOG_LEVEL ?? "info";
 export const nodeEnv = process.env.NODE_ENV ?? "development";
 
 export const requestTimeout = parseInt(
-  process.env.REQUEST_TIMEOUT ?? "30000",
+  process.env.REQUEST_TIMEOUT ?? "60000",
   10
 ); 
-export const modelTimeout = parseInt(process.env.MODEL_TIMEOUT ?? "25000", 10); 
+export const modelTimeout = parseInt(process.env.MODEL_TIMEOUT ?? "45000", 10); 
 
 if (isNaN(maxRequestsPerMinute) || maxRequestsPerMinute <= 0) {
   throw new Error("MAX_REQUESTS_PER_MINUTE must be a positive number");
@@ -46,7 +46,17 @@ if (isNaN(requestTimeout) || requestTimeout <= 0) {
 
 const checkOllamaHealth = async (): Promise<boolean> => {
   try {
-    const healthUrl = baseURL.replace("/api", "") + "/api/tags";
+    // For external endpoints, do a simple connectivity check
+    if (baseURL.includes('nosana.com')) {
+      const response = await fetch(baseURL, {
+        method: "HEAD",
+        signal: AbortSignal.timeout(10000),
+      });
+      return response.status < 500; // Accept any non-server error
+    }
+    
+    // For local Ollama
+    const healthUrl = baseURL.includes('/api') ? baseURL.replace("/api", "") + "/api/tags" : baseURL + "/api/tags";
     const response = await fetch(healthUrl, {
       method: "GET",
       signal: AbortSignal.timeout(5000), 
@@ -63,6 +73,12 @@ const checkOllamaHealth = async (): Promise<boolean> => {
 
 const checkModelAvailability = async (): Promise<boolean> => {
   try {
+    // Skip model availability check for external endpoints
+    if (baseURL.includes('nosana.com')) {
+      console.log('Using external Nosana endpoint - skipping model availability check');
+      return true;
+    }
+    
     const modelsUrl = baseURL.replace("/api", "") + "/api/tags";
     const response = await fetch(modelsUrl, {
       method: "GET",

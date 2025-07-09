@@ -10,7 +10,10 @@ The **Smart Contract Auditor Agent** is an advanced AI-powered security analysis
 
 ### Core Capabilities
 
-- **🛡️ Security Analysis**: Comprehensive vulnerability detection using OWASP and SWC registry patterns
+- **🛡️ Advanced Security Analysis**: Multi-layered vulnerability detection using OWASP, SWC registry patterns, and formal methods
+- **🤖 ML-Based Anomaly Detection**: Machine learning algorithms to identify novel attack vectors and suspicious patterns
+- **🔬 Formal Verification**: Model checking, symbolic execution, and abstract interpretation for mathematical proof of correctness
+- **📊 Advanced Static Analysis**: Control flow analysis, data flow analysis, and taint analysis
 - **⚡ Gas Optimization**: Automated gas usage analysis and optimization recommendations
 - **📊 Professional Reports**: Generate detailed audit reports in markdown format
 - **🔧 Multi-Tool Analysis**: Contract analyzer, vulnerability checker, and gas optimizer tools
@@ -19,6 +22,8 @@ The **Smart Contract Auditor Agent** is an advanced AI-powered security analysis
 ### Security Features
 
 - **No Sensitive Data Exposure**: All analysis is performed locally without external data transmission
+- **Advanced Threat Detection**: ML-based detection of obfuscation and novel attack patterns
+- **Formal Guarantees**: Mathematical verification of critical security properties
 - **Input Validation**: Comprehensive input sanitization and validation
 - **Rate Limiting**: Built-in protection against abuse (configurable)
 - **Secure Logging**: Structured logging without sensitive information exposure
@@ -27,11 +32,14 @@ The **Smart Contract Auditor Agent** is an advanced AI-powered security analysis
 
 ```
 src/mastra/agents/smart-contract-auditor/
-├── auditor-agent.ts              # Main agent definition
+├── auditor-agent.ts              # Main agent definition with advanced capabilities
 ├── contract-analyzer-tool.ts     # Core contract analysis
 ├── vulnerability-checker-tool.ts # Security vulnerability detection
 ├── gas-optimizer-tool.ts         # Gas optimization analysis
 ├── audit-report-generator.ts     # Professional report generation
+├── advanced-static-analyzer.ts   # Control flow, data flow, and taint analysis
+├── ml-anomaly-detector.ts        # Machine learning-based anomaly detection
+├── formal-verification-tool.ts   # Model checking and symbolic execution
 └── index.ts                      # Module exports
 ```
 
@@ -127,11 +135,14 @@ docker push yourusername/smart-contract-auditor:latest
 ### Basic Contract Analysis
 
 ```
-User: "Analyze this Solidity contract for security issues"
+User: "Perform a comprehensive security analysis of this contract"
 [Paste contract code]
 
-Agent: Performs comprehensive analysis including:
+Agent: Performs multi-layered analysis including:
 - Security vulnerability detection
+- Advanced static analysis (control flow, data flow)
+- ML-based anomaly detection for novel threats
+- Formal verification of critical properties
 - Gas optimization opportunities
 - Professional audit report generation
 ```
@@ -154,12 +165,29 @@ User: "How can I optimize gas usage in this contract?"
 Agent: Provides specific gas optimization recommendations with estimated savings
 ```
 
+### Advanced Analysis
+
+```
+User: "Perform formal verification on this DeFi contract"
+[Paste contract code]
+
+Agent: Conducts formal verification including:
+- Model checking for safety properties
+- Symbolic execution for path exploration
+- Abstract interpretation for invariant analysis
+- ML-based detection of novel DeFi attack patterns
+- Comprehensive verification report
+```
+
 ## 🧪 Testing
 
 ### Manual Testing Checklist
 
 - [ ] Agent responds to basic contract analysis requests
 - [ ] Vulnerability detection identifies common issues
+- [ ] Advanced static analysis provides control flow insights
+- [ ] ML anomaly detection identifies suspicious patterns
+- [ ] Formal verification produces meaningful results
 - [ ] Gas optimization provides actionable recommendations
 - [ ] Audit reports generate properly formatted output
 - [ ] Error handling works for invalid inputs
@@ -291,6 +319,9 @@ Check deployment status at [Nosana Dashboard](https://dashboard.nosana.com/deplo
 ### Tool Functions
 
 - `analyze-smart-contract` - Comprehensive contract analysis
+- `advanced-static-analysis` - Control flow, data flow, and taint analysis
+- `ml-anomaly-detection` - Machine learning-based anomaly detection
+- `formal-verification` - Model checking and symbolic execution
 - `check-vulnerabilities` - Security vulnerability detection
 - `optimize-gas-usage` - Gas optimization analysis
 - `generate-audit-report` - Professional report generation

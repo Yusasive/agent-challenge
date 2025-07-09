@@ -39,7 +39,7 @@ RUN pnpm prune --prod \
 # Set environment variables for production
 ENV NODE_ENV=production
 ENV API_BASE_URL=http://127.0.0.1:11500/api
-ENV MODEL_NAME_AT_ENDPOINT=qwen2.5:1.5b
+ENV MODEL_NAME_AT_ENDPOINT=qwen2.5:7b
 ENV PORT=8080
 
 # Create non-root user for security

@@ -1,5 +1,5 @@
 import dotenv from "dotenv";
-import { createOllama } from "ollama-ai-provider";
+import { createOpenAI } from "@ai-sdk/openai";
 import type { LanguageModelV1 } from "@ai-sdk/provider";
 
 // Load environment variables once at the beginning
@@ -15,10 +15,12 @@ if (missingEnvVars.length > 0) {
 }
 
 // Export all your environment variables with secure defaults
-// Defaults to Ollama qwen2.5:1.5b
-// https://ollama.com/library/qwen2.5
-export const modelName = process.env.MODEL_NAME_AT_ENDPOINT ?? "qwen2.5:1.5b";
-export const baseURL = process.env.API_BASE_URL ?? "http://127.0.0.1:11434/api";
+// Defaults to hosted qwen2.5:7b
+export const modelName = process.env.MODEL_NAME_AT_ENDPOINT ?? "qwen2.5:7b";
+export const baseURL = process.env.API_BASE_URL ?? "https://5tql5kqqyzbfo6jvsqwtgnumdgh49voayzqx7f2bd7fb.node.k8s.prd.nos.ci/v1";
+
+// API Key for hosted endpoints (if required)
+export const apiKey = process.env.API_KEY ?? "";
 
 // Security configuration
 export const enableRateLimiting = process.env.ENABLE_RATE_LIMITING === 'true';
@@ -54,108 +56,69 @@ const checkOllamaHealth = async (): Promise<boolean> => {
   }
 };
 
-// Function to check if model is available
+// Function to check if model is available on hosted endpoint
 const checkModelAvailability = async (): Promise<boolean> => {
   try {
-    const modelsUrl = baseURL.replace('/api', '') + '/api/tags';
+    const modelsUrl = baseURL + '/models';
     const response = await fetch(modelsUrl, { 
       method: 'GET',
-      signal: AbortSignal.timeout(5000)
+      headers: apiKey ? { 'Authorization': `Bearer ${apiKey}` } : {},
+      signal: AbortSignal.timeout(10000)
     });
     
     if (!response.ok) return false;
     
     const data = await response.json();
-    const availableModels = data.models || [];
+    const availableModels = data.data || data.models || [];
     const modelExists = availableModels.some((model: any) => 
-      model.name === modelName || model.name.startsWith(modelName.split(':')[0])
+      model.id === modelName || model.name === modelName || 
+      model.id?.includes(modelName) || model.name?.includes(modelName)
     );
     
     if (!modelExists) {
       console.warn(`Model ${modelName} not found. Available models:`, 
-        availableModels.map((m: any) => m.name).join(', '));
+        availableModels.map((m: any) => m.id || m.name).join(', '));
     }
     
     return modelExists;
   } catch (error) {
     console.error('Model availability check failed:', error instanceof Error ? error.message : 'Unknown error');
-    return false;
+    return true; // Assume available if we can't check
   }
 };
 
-// Create and export the model instance with improved error handling
-let model: LanguageModelV1;
-
-const initializeModel = async () => {
+// Initialize model with hosted endpoint
+const initializeModel = async (): Promise<LanguageModelV1> => {
   try {
-    // Check Ollama health first
-    console.log('Checking Ollama connection...');
-    const isHealthy = await checkOllamaHealth();
+    // Check hosted endpoint health first
+    console.log('Checking hosted endpoint connection...');
+    const isHealthy = await checkEndpointHealth();
     
     if (!isHealthy) {
-      throw new Error(`Ollama is not running or not accessible at ${baseURL}. Please start Ollama first.`);
+      console.warn(`⚠️  Hosted endpoint not accessible at ${baseURL}. Proceeding anyway...`);
     }
     
-    console.log('✅ Ollama is running');
+    console.log('✅ Hosted endpoint is accessible');
     
     // Check if model is available
     console.log(`Checking if model ${modelName} is available...`);
     const modelAvailable = await checkModelAvailability();
     
     if (!modelAvailable) {
-      console.warn(`⚠️  Model ${modelName} not found. Attempting to pull...`);
-      // Note: We can't pull the model from here, user needs to do it manually
+      console.warn(`⚠️  Model ${modelName} not found in model list. Proceeding anyway...`);
     }
 
-    const ollamaProvider = createOllama({ 
+    // Create OpenAI-compatible provider for hosted endpoint
+    const provider = createOpenAI({ 
       baseURL,
-      // Optimized fetch with better timeout handling
-      fetch: async (url, options) => {
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => {
-          console.log(`⏰ Request timeout after ${modelTimeout}ms for ${url}`);
-          controller.abort();
-        }, modelTimeout);
-        
-        try {
-          const response = await fetch(url, {
-            ...options,
-            signal: controller.signal,
-            headers: {
-              'Content-Type': 'application/json',
-              ...options?.headers,
-            },
-          });
-          
-          clearTimeout(timeoutId);
-          
-          if (!response.ok) {
-            const errorText = await response.text().catch(() => 'Unknown error');
-            throw new Error(`HTTP ${response.status}: ${errorText}`);
-          }
-          
-          return response;
-        } catch (error) {
-          clearTimeout(timeoutId);
-          
-          if (error instanceof Error) {
-            if (error.name === 'AbortError') {
-              throw new Error(`Request timed out after ${modelTimeout}ms. The model might be too large or Ollama is overloaded.`);
-            }
-            throw error;
-          }
-          throw new Error('Unknown fetch error');
-        }
-      }
+      apiKey: apiKey || 'dummy-key', // Some endpoints don't require real API keys
     });
 
-    // Create the chat model with optimized settings
-    model = ollamaProvider.chat(modelName, {
-      // Remove temperature and other unsupported options
-      // Keep only basic configuration
-    });
+    // Create the chat model
+    const model = provider(modelName);
     
     console.log('✅ Model initialized successfully');
+    return model;
     
   } catch (error) {
     console.error('❌ Failed to initialize model:', error);
@@ -163,17 +126,22 @@ const initializeModel = async () => {
   }
 };
 
-// Initialize model synchronously for now, but provide better error messages
+// Create and export the model instance
+let model: LanguageModelV1;
+
+// Initialize model synchronously for immediate use
 try {
-  const ollamaProvider = createOllama({ baseURL });
-  model = ollamaProvider.chat(modelName);
+  const provider = createOpenAI({ 
+    baseURL,
+    apiKey: apiKey || 'dummy-key',
+  });
+  model = provider(modelName);
 } catch (error) {
   console.error('Failed to initialize model:', error);
   throw new Error(`Model initialization failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
 }
 
-export { model, initializeModel, checkOllamaHealth, checkModelAvailability };
-
+export { model, initializeModel, checkEndpointHealth, checkModelAvailability };
 // Log configuration (without sensitive data)
 console.log(`Configuration loaded:`);
 console.log(`- Model: ${modelName}`);

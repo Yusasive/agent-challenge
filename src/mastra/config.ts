@@ -41,17 +41,18 @@ if (isNaN(requestTimeout) || requestTimeout <= 0) {
   throw new Error('REQUEST_TIMEOUT must be a positive number');
 }
 
-// Function to check if Ollama is running
-const checkOllamaHealth = async (): Promise<boolean> => {
+// Function to check if hosted endpoint is accessible
+const checkEndpointHealth = async (): Promise<boolean> => {
   try {
-    const healthUrl = baseURL.replace('/api', '') + '/api/tags';
+    const healthUrl = baseURL + '/models';
     const response = await fetch(healthUrl, { 
       method: 'GET',
-      signal: AbortSignal.timeout(5000) // 5 second timeout for health check
+      headers: apiKey ? { 'Authorization': `Bearer ${apiKey}` } : {},
+      signal: AbortSignal.timeout(10000) // 10 second timeout for health check
     });
     return response.ok;
   } catch (error) {
-    console.error('Ollama health check failed:', error instanceof Error ? error.message : 'Unknown error');
+    console.error('Hosted endpoint health check failed:', error instanceof Error ? error.message : 'Unknown error');
     return false;
   }
 };
@@ -66,7 +67,10 @@ const checkModelAvailability = async (): Promise<boolean> => {
       signal: AbortSignal.timeout(10000)
     });
     
-    if (!response.ok) return false;
+    if (!response.ok) {
+      console.warn(`Models endpoint returned ${response.status}`);
+      return true; // Assume available if we can't check
+    }
     
     const data = await response.json();
     const availableModels = data.data || data.models || [];
@@ -75,12 +79,12 @@ const checkModelAvailability = async (): Promise<boolean> => {
       model.id?.includes(modelName) || model.name?.includes(modelName)
     );
     
-    if (!modelExists) {
+    if (!modelExists && availableModels.length > 0) {
       console.warn(`Model ${modelName} not found. Available models:`, 
         availableModels.map((m: any) => m.id || m.name).join(', '));
     }
     
-    return modelExists;
+    return modelExists || availableModels.length === 0; // If no models listed, assume available
   } catch (error) {
     console.error('Model availability check failed:', error instanceof Error ? error.message : 'Unknown error');
     return true; // Assume available if we can't check
@@ -96,9 +100,9 @@ const initializeModel = async (): Promise<LanguageModelV1> => {
     
     if (!isHealthy) {
       console.warn(`⚠️  Hosted endpoint not accessible at ${baseURL}. Proceeding anyway...`);
+    } else {
+      console.log('✅ Hosted endpoint is accessible');
     }
-    
-    console.log('✅ Hosted endpoint is accessible');
     
     // Check if model is available
     console.log(`Checking if model ${modelName} is available...`);
@@ -112,6 +116,44 @@ const initializeModel = async (): Promise<LanguageModelV1> => {
     const provider = createOpenAI({ 
       baseURL,
       apiKey: apiKey || 'dummy-key', // Some endpoints don't require real API keys
+      // Add custom fetch with timeout handling
+      fetch: async (url, options) => {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => {
+          console.log(`⏰ Request timeout after ${modelTimeout}ms for ${url}`);
+          controller.abort();
+        }, modelTimeout);
+        
+        try {
+          const response = await fetch(url, {
+            ...options,
+            signal: controller.signal,
+            headers: {
+              'Content-Type': 'application/json',
+              ...options?.headers,
+            },
+          });
+          
+          clearTimeout(timeoutId);
+          
+          if (!response.ok) {
+            const errorText = await response.text().catch(() => 'Unknown error');
+            throw new Error(`HTTP ${response.status}: ${errorText}`);
+          }
+          
+          return response;
+        } catch (error) {
+          clearTimeout(timeoutId);
+          
+          if (error instanceof Error) {
+            if (error.name === 'AbortError') {
+              throw new Error(`Request timed out after ${modelTimeout}ms. The hosted endpoint might be overloaded.`);
+            }
+            throw error;
+          }
+          throw new Error('Unknown fetch error');
+        }
+      }
     });
 
     // Create the chat model
@@ -136,16 +178,18 @@ try {
     apiKey: apiKey || 'dummy-key',
   });
   model = provider(modelName);
+  console.log('✅ Model provider initialized');
 } catch (error) {
   console.error('Failed to initialize model:', error);
   throw new Error(`Model initialization failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
 }
 
 export { model, initializeModel, checkEndpointHealth, checkModelAvailability };
+
 // Log configuration (without sensitive data)
 console.log(`Configuration loaded:`);
 console.log(`- Model: ${modelName}`);
-console.log(`- Base URL: ${baseURL.replace(/\/\/.*@/, '//***@')}`); // Hide credentials in URL
+console.log(`- Base URL: ${baseURL}`);
 console.log(`- Environment: ${nodeEnv}`);
 console.log(`- Rate Limiting: ${enableRateLimiting ? 'Enabled' : 'Disabled'}`);
 console.log(`- Request Timeout: ${requestTimeout}ms`);

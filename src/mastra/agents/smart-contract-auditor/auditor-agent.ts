@@ -57,16 +57,16 @@ FALLBACK ANALYSIS: If tools fail, analyze the contract manually by looking for:
 - Unprotected functions
 
 Example response structure:
-🔍 **Initial Analysis**
+ **Initial Analysis**
 I can see this is a [contract description]. Let me analyze it for security issues...
 
 [Use tools or provide manual analysis]
 
-🛡️ **Security Assessment**
+ **Security Assessment**
 - Overall Risk: [Level]
 - Key Issues Found: [List]
 
-💡 **Recommendations**
+ **Recommendations**
 - [Specific actionable items]
 
 Always ensure the user gets a helpful response within 10 seconds.
@@ -76,10 +76,10 @@ export const smartContractAuditorAgent = new Agent({
   name,
   instructions,
   model,
-  tools: { 
+  tools: {
     contractAnalyzerTool,
     gasOptimizerTool,
     vulnerabilityCheckerTool,
-    auditReportGenerator
+    auditReportGenerator,
   },
 });

@@ -1,5 +1,5 @@
 # Multi-stage build for optimized image size
-FROM ollama/ollama:0.7.0 as base
+FROM ollama/ollama:0.7.0 AS base
 
 # Install system dependencies and Node.js in a single layer
 RUN apt-get update && apt-get install -y \
@@ -18,10 +18,13 @@ RUN chown -R 1000:1000 /app
 COPY package.json pnpm-lock.yaml ./
 
 # Install dependencies
-RUN pnpm install --frozen-lockfile --prod
+RUN pnpm install --frozen-lockfile
 
 # Copy source code
 COPY . .
+
+# Test for mastra installment version
+RUN pnpm exec mastra --version
 
 # Build the project
 RUN pnpm run build
@@ -35,7 +38,7 @@ RUN pnpm prune --prod \
 
 # Set environment variables for production
 ENV NODE_ENV=production
-ENV API_BASE_URL=http://127.0.0.1:11434/api
+ENV API_BASE_URL=http://127.0.0.1:11500/api
 ENV MODEL_NAME_AT_ENDPOINT=qwen2.5:1.5b
 ENV PORT=8080
 
@@ -60,7 +63,7 @@ CMD ["set -e && \
   OLLAMA_PID=$! && \
   echo 'Waiting for Ollama to be ready...' && \
   timeout=60 && \
-  while [ $timeout -gt 0 ] && ! curl -s http://127.0.0.1:11434/api/tags >/dev/null 2>&1; do \
+  while [ $timeout -gt 0 ] && ! curl -s http://127.0.0.1:11500/api/tags >/dev/null 2>&1; do \
     echo \"Ollama not ready yet, waiting 2 seconds... ($timeout seconds remaining)\" && \
     sleep 2 && \
     timeout=$((timeout-2)); \

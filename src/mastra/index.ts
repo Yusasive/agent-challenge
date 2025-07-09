@@ -5,28 +5,59 @@ import { weatherWorkflow } from "./agents/weather-agent/weather-workflow"; // Th
 import { smartContractAuditorAgent } from "./agents/smart-contract-auditor/auditor-agent";
 import { requestTimeout } from "./config";
 
-console.log('🚀 Initializing Mastra with Smart Contract Auditor Agent...');
-
 export const mastra = new Mastra({
-	workflows: { weatherWorkflow }, // can be deleted later
-	agents: { 
-		weatherAgent, // can be deleted later
-		smartContractAuditorAgent 
-	},
-	logger: new PinoLogger({
-		name: "Mastra",
-		level: "info",
-	}),
-	server: {
-		port: 8080,
-		timeout: requestTimeout, // Use configurable timeout
-		cors: {
-			origin: true,
-			credentials: true,
-		},
-	},
-});
+  workflows: { weatherWorkflow }, // can be deleted later
+  agents: {
+    weatherAgent, // can be deleted later
+    smartContractAuditorAgent,
+  },
+  logger: new PinoLogger({
+    name: "Mastra",
+    level: "info",
+  }),
+  server: {
+    port: 8080,
+    timeout: requestTimeout,
+    cors: {
+      origin: "*",
+      credentials: true,
+    },
+    middleware: [
+      async (c: any, next: () => Promise<void>) => {
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), requestTimeout);
 
-// Log registered agents for debugging
-console.log('📋 Registered agents:', Object.keys(mastra.agents || {}));
-console.log('📋 Registered workflows:', Object.keys(mastra.workflows || {}));
+        try {
+          await next();
+        } catch (error) {
+          console.error("Request timeout or error:", error);
+          return c.json(
+            {
+              error: "Request timeout",
+              message:
+                "The request took too long to process. Please try again with a smaller contract or simpler query.",
+            },
+            408
+          );
+        } finally {
+          clearTimeout(timeout);
+        }
+      },
+
+      async (c: any, next: () => Promise<void>) => {
+        try {
+          await next();
+        } catch (error) {
+          console.error("Server error:", error);
+          return c.json(
+            {
+              error: "Internal server error",
+              message: "An unexpected error occurred. Please try again.",
+            },
+            500
+          );
+        }
+      },
+    ],
+  },
+});

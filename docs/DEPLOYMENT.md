@@ -7,6 +7,7 @@ This guide covers deploying the Smart Contract Auditor Agent to various environm
 ## 📋 Pre-deployment Checklist
 
 ### Security Verification
+
 - [ ] No sensitive data in source code
 - [ ] Environment variables properly configured
 - [ ] Input validation implemented
@@ -15,6 +16,7 @@ This guide covers deploying the Smart Contract Auditor Agent to various environm
 - [ ] Logs don't expose sensitive information
 
 ### Testing Verification
+
 - [ ] All security tests pass
 - [ ] Agent responds correctly to test contracts
 - [ ] Vulnerability detection works
@@ -23,6 +25,7 @@ This guide covers deploying the Smart Contract Auditor Agent to various environm
 - [ ] Error handling works correctly
 
 ### Performance Verification
+
 - [ ] Docker image size optimized
 - [ ] Memory usage within limits
 - [ ] Response times acceptable
@@ -31,6 +34,7 @@ This guide covers deploying the Smart Contract Auditor Agent to various environm
 ## 🐳 Docker Deployment
 
 ### 1. Build Optimized Image
+
 ```bash
 # Build with build args for optimization
 docker build \
@@ -44,6 +48,7 @@ docker images yourusername/smart-contract-auditor:latest
 ```
 
 ### 2. Test Locally
+
 ```bash
 # Run with production settings
 docker run -d \
@@ -66,6 +71,7 @@ docker stop auditor-test && docker rm auditor-test
 ```
 
 ### 3. Push to Registry
+
 ```bash
 # Login to Docker Hub
 docker login
@@ -78,6 +84,7 @@ docker push yourusername/smart-contract-auditor:v1.0.0
 ## 🌐 Nosana Deployment
 
 ### 1. Update Job Definition
+
 Edit `nos_job_def/nosana_mastra.json`:
 
 ```json
@@ -126,6 +133,7 @@ Edit `nos_job_def/nosana_mastra.json`:
 ```
 
 ### 2. Deploy with Nosana CLI
+
 ```bash
 # Install Nosana CLI (if not already installed)
 npm install -g @nosana/cli
@@ -145,6 +153,7 @@ nosana job list
 ```
 
 ### 3. Verify Deployment
+
 ```bash
 # Get job details
 nosana job get <JOB_ID>
@@ -159,6 +168,7 @@ curl https://<NOSANA_ENDPOINT>/health
 ## 🔧 Environment Configuration
 
 ### Production Environment Variables
+
 ```bash
 # Core configuration
 NODE_ENV=production
@@ -166,7 +176,7 @@ PORT=8080
 
 # LLM configuration
 MODEL_NAME_AT_ENDPOINT=qwen2.5:1.5b
-API_BASE_URL=http://127.0.0.1:11434/api
+API_BASE_URL=http://127.0.0.1:11500/api
 
 # Security configuration
 ENABLE_RATE_LIMITING=true
@@ -179,16 +189,18 @@ MAX_MEMORY_MB=4096
 ```
 
 ### Development vs Production
-| Setting | Development | Production |
-|---------|-------------|------------|
-| LOG_LEVEL | debug | warn |
-| RATE_LIMITING | false | true |
-| NODE_ENV | development | production |
-| TIMEOUT | 10s | 30s |
+
+| Setting       | Development | Production |
+| ------------- | ----------- | ---------- |
+| LOG_LEVEL     | debug       | warn       |
+| RATE_LIMITING | false       | true       |
+| NODE_ENV      | development | production |
+| TIMEOUT       | 10s         | 30s        |
 
 ## 📊 Monitoring & Health Checks
 
 ### Health Check Endpoint
+
 ```bash
 # Basic health check
 GET /health
@@ -203,6 +215,7 @@ GET /health
 ```
 
 ### Monitoring Metrics
+
 - Response time
 - Memory usage
 - Request rate
@@ -210,6 +223,7 @@ GET /health
 - Model availability
 
 ### Logging
+
 ```bash
 # View logs in production
 docker logs <container_id>
@@ -226,15 +240,17 @@ docker logs <container_id> 2>&1 | grep "ERROR"
 ### Common Issues
 
 **1. Ollama Connection Failed**
+
 ```bash
 # Check Ollama status
-curl http://localhost:11434/api/tags
+curl http://localhost:11500/api/tags
 
 # Restart container
 docker restart <container_id>
 ```
 
 **2. High Memory Usage**
+
 ```bash
 # Check memory usage
 docker stats <container_id>
@@ -244,6 +260,7 @@ docker stats <container_id>
 ```
 
 **3. Rate Limiting Issues**
+
 ```bash
 # Check rate limit settings
 curl -I http://localhost:8080/health
@@ -253,6 +270,7 @@ ENABLE_RATE_LIMITING=false  # For testing only
 ```
 
 **4. Container Won't Start**
+
 ```bash
 # Check logs
 docker logs <container_id>
@@ -266,12 +284,14 @@ docker logs <container_id>
 ### Performance Optimization
 
 **Memory Optimization**
+
 ```dockerfile
 # In Dockerfile
 ENV NODE_OPTIONS="--max-old-space-size=4096"
 ```
 
 **Response Time Optimization**
+
 ```bash
 # Use smaller model for faster responses
 MODEL_NAME_AT_ENDPOINT=qwen2.5:1.5b
@@ -283,24 +303,28 @@ TIMEOUT_MS=60000
 ## 📈 Scaling Considerations
 
 ### Horizontal Scaling
+
 - Deploy multiple instances
 - Use load balancer
 - Implement session affinity
 
 ### Vertical Scaling
+
 - Increase memory allocation
 - Use larger GPU instances
 - Optimize model size
 
 ### Resource Requirements
-| Model | RAM | VRAM | CPU |
-|-------|-----|------|-----|
-| qwen2.5:1.5b | 4GB | 2GB | 2 cores |
-| qwen2.5:32b | 16GB | 8GB | 4 cores |
+
+| Model        | RAM  | VRAM | CPU     |
+| ------------ | ---- | ---- | ------- |
+| qwen2.5:1.5b | 4GB  | 2GB  | 2 cores |
+| qwen2.5:32b  | 16GB | 8GB  | 4 cores |
 
 ## 🔐 Security in Production
 
 ### Security Checklist
+
 - [ ] HTTPS enabled
 - [ ] Rate limiting active
 - [ ] Input validation working
@@ -310,6 +334,7 @@ TIMEOUT_MS=60000
 - [ ] No debug information exposed
 
 ### Security Monitoring
+
 ```bash
 # Monitor for suspicious activity
 grep "Rate limit exceeded" /var/log/app.log
@@ -324,6 +349,7 @@ docker stats --no-stream
 ## 📝 Deployment Verification
 
 ### Post-Deployment Tests
+
 ```bash
 # 1. Health check
 curl https://your-deployment/health
@@ -343,6 +369,7 @@ curl -I https://your-deployment/health
 ```
 
 ### Success Criteria
+
 - [ ] Health check returns 200
 - [ ] Agent responds to messages
 - [ ] Rate limiting works (429 after limit)
@@ -355,6 +382,7 @@ curl -I https://your-deployment/health
 **Deployment completed successfully!** 🎉
 
 Remember to:
+
 1. Monitor the deployment for the first 24 hours
 2. Check logs for any errors
 3. Verify all security measures are active

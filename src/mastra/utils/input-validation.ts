@@ -1,12 +1,10 @@
 import { z } from "zod";
 
-// Input validation schemas
 export const contractCodeSchema = z.string()
   .min(1, "Contract code cannot be empty")
   .max(50000, "Contract code too large (max 50KB)")
   .refine(
     (code) => {
-      // Basic Solidity validation
       const hasPragma = /pragma\s+solidity/i.test(code);
       const hasContract = /contract\s+\w+/i.test(code);
       return hasPragma || hasContract;
@@ -19,24 +17,21 @@ export const contractNameSchema = z.string()
   .max(100, "Contract name too long")
   .regex(/^[a-zA-Z_][a-zA-Z0-9_]*$/, "Invalid contract name format");
 
-// Sanitization functions
 export const sanitizeContractCode = (code: string): string => {
-  // Remove potentially dangerous patterns while preserving code structure
   return code
-    .replace(/<!--[\s\S]*?-->/g, '') // Remove HTML comments
-    .replace(/<script[\s\S]*?<\/script>/gi, '') // Remove script tags
-    .replace(/<[^>]*>/g, '') // Remove HTML tags
+    .replace(/<!--[\s\S]*?-->/g, '') 
+    .replace(/<script[\s\S]*?<\/script>/gi, '') 
+    .replace(/<[^>]*>/g, '') 
     .trim();
 };
 
 export const sanitizeContractName = (name: string): string => {
   return name
-    .replace(/[^a-zA-Z0-9_]/g, '') // Keep only alphanumeric and underscore
-    .substring(0, 100) // Limit length
+    .replace(/[^a-zA-Z0-9_]/g, '') 
+    .substring(0, 100) 
     .trim();
 };
 
-// Rate limiting utilities
 export class RateLimiter {
   private requests: Map<string, number[]> = new Map();
   private readonly maxRequests: number;
@@ -51,7 +46,6 @@ export class RateLimiter {
     const now = Date.now();
     const requests = this.requests.get(identifier) || [];
     
-    // Remove old requests outside the window
     const validRequests = requests.filter(time => now - time < this.windowMs);
     
     if (validRequests.length >= this.maxRequests) {
@@ -71,7 +65,6 @@ export class RateLimiter {
   }
 }
 
-// Security utilities
 export const validateAndSanitizeInput = (input: {
   contractCode?: string;
   contractName?: string;
@@ -93,7 +86,6 @@ export const validateAndSanitizeInput = (input: {
   return result;
 };
 
-// Logging utilities (security-aware)
 export const createSecureLogger = (level: string = 'info') => {
   const logLevels = ['error', 'warn', 'info', 'debug'];
   const currentLevel = logLevels.indexOf(level);
@@ -125,15 +117,12 @@ export const createSecureLogger = (level: string = 'info') => {
 const sanitizeLogMeta = (meta: any): any => {
   if (!meta) return meta;
   
-  // Remove sensitive information from logs
   const sanitized = { ...meta };
   
-  // Remove contract code from logs
   if (sanitized.contractCode) {
     sanitized.contractCode = '[REDACTED]';
   }
   
-  // Remove API keys or tokens
   if (sanitized.apiKey) {
     sanitized.apiKey = '[REDACTED]';
   }

@@ -6,7 +6,6 @@ const checkOllama = async () => {
   const modelName = "qwen2.5:1.5b";
 
   try {
-    // Check if Ollama is running
     console.log("1. Checking if Ollama is running...");
     const healthResponse = await fetch(`${baseURL}/api/tags`, {
       signal: AbortSignal.timeout(5000),
@@ -16,9 +15,8 @@ const checkOllama = async () => {
       throw new Error(`Ollama not responding: ${healthResponse.status}`);
     }
 
-    console.log("✅ Ollama is running");
+    console.log("Ollama is running");
 
-    // Check available models
     console.log("\n2. Checking available models...");
     const modelsData = await healthResponse.json();
     const models = modelsData.models || [];
@@ -30,7 +28,6 @@ const checkOllama = async () => {
       );
     });
 
-    // Check if our model exists
     const hasModel = models.some(
       (model) =>
         model.name === modelName ||
@@ -38,13 +35,13 @@ const checkOllama = async () => {
     );
 
     if (!hasModel) {
-      console.log(`\n❌ Model ${modelName} not found!`);
-      console.log(`\n🔧 To fix this, run:`);
+      console.log(`\n Model ${modelName} not found!`);
+      console.log(`\n To fix this, run:`);
       console.log(`   ollama pull ${modelName}`);
       return;
     }
 
-    console.log(`✅ Model ${modelName} is available`);
+    console.log(` Model ${modelName} is available`);
 
     // Test a simple chat request
     console.log("\n3. Testing chat functionality...");
@@ -64,20 +61,20 @@ const checkOllama = async () => {
     }
 
     const chatData = await chatResponse.json();
-    console.log("✅ Chat test successful");
+    console.log(" Chat test successful");
     console.log(`Response: ${chatData.message?.content || "No content"}`);
 
-    console.log("\n🎉 Ollama setup is working correctly!");
+    console.log("\n Ollama setup is working correctly!");
   } catch (error) {
-    console.error("\n❌ Ollama check failed:", error.message);
+    console.error("\n Ollama check failed:", error.message);
 
     if (error.name === "AbortError" || error.message.includes("timeout")) {
-      console.log("\n🔧 Timeout detected. Try these solutions:");
+      console.log("\n Timeout detected. Try these solutions:");
       console.log("1. Use a smaller model: ollama pull qwen2.5:0.5b");
       console.log("2. Increase system memory");
       console.log("3. Close other applications");
     } else if (error.message.includes("fetch")) {
-      console.log("\n🔧 Connection failed. Try these solutions:");
+      console.log("\n Connection failed. Try these solutions:");
       console.log("1. Start Ollama: ollama serve");
       console.log("2. Check if port 11500 is available");
       console.log("3. Restart Ollama service");
@@ -85,5 +82,4 @@ const checkOllama = async () => {
   }
 };
 
-// Run the check
 checkOllama();

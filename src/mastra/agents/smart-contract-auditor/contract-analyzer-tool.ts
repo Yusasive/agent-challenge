@@ -53,9 +53,8 @@ export const contractAnalyzerTool = createTool({
   }),
   execute: async ({ context }) => {
     try {
-      // Add timeout protection for large contracts
       const startTime = Date.now();
-      const maxAnalysisTime = 30000; // 30 seconds max
+      const maxAnalysisTime = 30000; 
 
       const result = await Promise.race([
         analyzeContract(context.contractCode, context.contractName),
@@ -91,9 +90,9 @@ const analyzeContract = async (
 
   // Remove potentially dangerous content
   const sanitizedCode = contractCode
-    .replace(/<!--[\s\S]*?-->/g, "") // Remove HTML comments
-    .replace(/<script[\s\S]*?<\/script>/gi, "") // Remove script tags
-    .replace(/<[^>]*>/g, "") // Remove HTML tags
+    .replace(/<!--[\s\S]*?-->/g, "") 
+    .replace(/<script[\s\S]*?<\/script>/gi, "")
+    .replace(/<[^>]*>/g, "")
     .trim();
 
   const lines = sanitizedCode.split("\n");
@@ -101,11 +100,9 @@ const analyzeContract = async (
   const issues: SecurityIssue[] = [];
   const gasOptimizations: string[] = [];
 
-  // Extract contract name if not provided
   const nameMatch = sanitizedCode.match(/contract\s+(\w+)/);
   const finalContractName = contractName || nameMatch?.[1] || "UnknownContract";
 
-  // Quick validation for Solidity code
   const hasPragma = /pragma\s+solidity/i.test(sanitizedCode);
   const hasContract = /contract\s+\w+/i.test(sanitizedCode);
 
@@ -214,7 +211,7 @@ const analyzeContract = async (
           recommendation: check.recommendation,
           impact: check.impact,
         });
-        break; // Only one issue per line to avoid duplicates
+        break; 
       }
     }
   }
@@ -256,8 +253,8 @@ const analyzeContract = async (
     contractName: finalContractName,
     totalLines,
     securityScore,
-    issues: issues.slice(0, 20), // Limit issues to prevent overwhelming responses
-    gasOptimizations: gasOptimizations.slice(0, 5), // Limit optimizations
+    issues: issues.slice(0, 20), 
+    gasOptimizations: gasOptimizations.slice(0, 5), 
     summary,
   };
 };
@@ -280,7 +277,7 @@ const checkReentrancyPattern = (code: string): boolean => {
       !line.includes("assert")
     ) {
       hasStateChange = true;
-      break; // Found pattern, no need to continue
+      break; 
     }
   }
 

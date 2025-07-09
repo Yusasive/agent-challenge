@@ -29,11 +29,10 @@ const testChatEndpoint = async () => {
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error("❌ Error response:", errorText);
+      console.error("Error response:", errorText);
       return;
     }
 
-    // Check if response is streaming
     const contentType = response.headers.get("content-type");
     console.log(`Content-Type: ${contentType}`);
 
@@ -56,7 +55,7 @@ const testChatEndpoint = async () => {
           process.stdout.write(chunk);
         }
         console.log(
-          "\n\n✅ Full response received:",
+          "\n\n Full response received:",
           fullResponse.length,
           "characters"
         );
@@ -66,9 +65,8 @@ const testChatEndpoint = async () => {
       console.log("📄 Regular response:", responseText);
     }
   } catch (error) {
-    console.error("❌ Test failed:", error.message);
+    console.error(" Test failed:", error.message);
   }
 };
 
-// Run the test
 testChatEndpoint();

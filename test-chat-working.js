@@ -6,7 +6,7 @@ const testSmartContractAuditor = async () => {
 
   const baseURL = "http://localhost:8080";
 
-  // Test contract for analysis
+
   const testContract = `
   pragma solidity ^0.7.0;
   
@@ -26,7 +26,6 @@ const testSmartContractAuditor = async () => {
       }
   }`;
 
-  // Try the correct Mastra API endpoint structure
   const endpoints = [
     "/api/agents/smartContractAuditorAgent/generate",
     "/api/agents/smartContractAuditorAgent/stream",
@@ -58,7 +57,7 @@ const testSmartContractAuditor = async () => {
       console.log(`Status: ${response.status}`);
 
       if (response.ok) {
-        console.log("✅ Success! Reading response...");
+        console.log("Success! Reading response...");
 
         const contentType = response.headers.get("content-type");
         console.log(`Content-Type: ${contentType}`);
@@ -67,7 +66,7 @@ const testSmartContractAuditor = async () => {
           contentType?.includes("text/event-stream") ||
           contentType?.includes("text/plain")
         ) {
-          // Handle streaming response
+         
           const reader = response.body?.getReader();
           const decoder = new TextDecoder();
 
@@ -85,30 +84,29 @@ const testSmartContractAuditor = async () => {
             }
 
             console.log(
-              `\n\n✅ Complete response received (${fullResponse.length} chars)`
+              `\n\n Complete response received (${fullResponse.length} chars)`
             );
-            return; // Success, exit
+            return; 
           }
         } else {
-          // Handle JSON response
+       
           const data = await response.json();
           console.log("📄 JSON Response:", JSON.stringify(data, null, 2));
-          return; // Success, exit
+          return; 
         }
       } else {
         const errorText = await response.text();
-        console.log(`❌ Error: ${errorText}`);
+        console.log(`Error: ${errorText}`);
       }
     } catch (error) {
-      console.log(`❌ Request failed: ${error.message}`);
+      console.log(` Request failed: ${error.message}`);
     }
   }
 
   console.log(
-    "\n❌ All endpoints failed. Let me check the Mastra documentation structure..."
+    "\n All endpoints failed. Let me check the Mastra documentation structure..."
   );
 
-  // Try alternative message formats
   console.log("\n🔍 Trying alternative message formats...");
 
   const alternativeFormats = [
@@ -137,7 +135,7 @@ const testSmartContractAuditor = async () => {
   ];
 
   for (const format of alternativeFormats) {
-    console.log(`\n🧪 Testing ${format.name}...`);
+    console.log(`\nTesting ${format.name}...`);
 
     try {
       const response = await fetch(
@@ -155,7 +153,7 @@ const testSmartContractAuditor = async () => {
 
       if (response.ok) {
         const data = await response.text();
-        console.log(`✅ Success with ${format.name}!`);
+        console.log(`Success with ${format.name}!`);
         console.log("Response:", data.substring(0, 200) + "...");
         return;
       }
@@ -165,5 +163,4 @@ const testSmartContractAuditor = async () => {
   }
 };
 
-// Run the test
 testSmartContractAuditor();

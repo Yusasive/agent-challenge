@@ -2,7 +2,7 @@
 // Run with: node check-endpoints.js
 
 const checkEndpoints = async () => {
-  console.log("🔍 Checking available endpoints...\n");
+  console.log(" Checking available endpoints...\n");
 
   const baseURL = "http://localhost:8080";
 
@@ -17,7 +17,7 @@ const checkEndpoints = async () => {
       console.log("Health response:", healthData);
     }
   } catch (error) {
-    console.log("❌ Health check failed:", error.message);
+    console.log(" Health check failed:", error.message);
   }
 
   // Check API root
@@ -31,7 +31,7 @@ const checkEndpoints = async () => {
       console.log("API response:", apiData);
     }
   } catch (error) {
-    console.log("❌ API root failed:", error.message);
+    console.log(" API root failed:", error.message);
   }
 
   // Check agents endpoint
@@ -45,7 +45,7 @@ const checkEndpoints = async () => {
       console.log("Agents response:", agentsData);
     }
   } catch (error) {
-    console.log("❌ Agents endpoint failed:", error.message);
+    console.log(" Agents endpoint failed:", error.message);
   }
 
   // Try different possible endpoints

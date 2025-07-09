@@ -2,10 +2,8 @@ import dotenv from "dotenv";
 import { createOllama } from "ollama-ai-provider";
 import type { LanguageModelV1 } from "ai";
 
-// Load environment variables once at the beginning
 dotenv.config();
 
-// Validate required environment variables
 const requiredEnvVars = ["MODEL_NAME_AT_ENDPOINT", "API_BASE_URL"];
 const missingEnvVars = requiredEnvVars.filter(
   (varName) => !process.env[varName]
@@ -20,13 +18,10 @@ if (missingEnvVars.length > 0) {
   );
 }
 
-// Export all your environment variables with secure defaults
-// Defaults to Ollama qwen2.5:1.5b
-// https://ollama.com/library/qwen2.5
+
 export const modelName = process.env.MODEL_NAME_AT_ENDPOINT ?? "qwen2.5:1.5b";
 export const baseURL = process.env.API_BASE_URL ?? "http://127.0.0.1:11434/api";
 
-// Security configuration
 export const enableRateLimiting = process.env.ENABLE_RATE_LIMITING === "true";
 export const maxRequestsPerMinute = parseInt(
   process.env.MAX_REQUESTS_PER_MINUTE ?? "60",
@@ -35,14 +30,12 @@ export const maxRequestsPerMinute = parseInt(
 export const logLevel = process.env.LOG_LEVEL ?? "info";
 export const nodeEnv = process.env.NODE_ENV ?? "development";
 
-// Timeout configuration - optimized for better responsiveness
 export const requestTimeout = parseInt(
   process.env.REQUEST_TIMEOUT ?? "30000",
   10
-); // 30 seconds
-export const modelTimeout = parseInt(process.env.MODEL_TIMEOUT ?? "25000", 10); // 25 seconds
+); 
+export const modelTimeout = parseInt(process.env.MODEL_TIMEOUT ?? "25000", 10); 
 
-// Validate configuration
 if (isNaN(maxRequestsPerMinute) || maxRequestsPerMinute <= 0) {
   throw new Error("MAX_REQUESTS_PER_MINUTE must be a positive number");
 }
@@ -51,13 +44,12 @@ if (isNaN(requestTimeout) || requestTimeout <= 0) {
   throw new Error("REQUEST_TIMEOUT must be a positive number");
 }
 
-// Function to check if Ollama is running
 const checkOllamaHealth = async (): Promise<boolean> => {
   try {
     const healthUrl = baseURL.replace("/api", "") + "/api/tags";
     const response = await fetch(healthUrl, {
       method: "GET",
-      signal: AbortSignal.timeout(5000), // 5 second timeout for health check
+      signal: AbortSignal.timeout(5000), 
     });
     return response.ok;
   } catch (error) {
@@ -69,7 +61,6 @@ const checkOllamaHealth = async (): Promise<boolean> => {
   }
 };
 
-// Function to check if model is available
 const checkModelAvailability = async (): Promise<boolean> => {
   try {
     const modelsUrl = baseURL.replace("/api", "") + "/api/tags";
@@ -105,12 +96,11 @@ const checkModelAvailability = async (): Promise<boolean> => {
   }
 };
 
-// Create and export the model instance with improved error handling
 let model: LanguageModelV1;
 
 const initializeModel = async () => {
   try {
-    // Check Ollama health first
+ 
     console.log("Checking Ollama connection...");
     const isHealthy = await checkOllamaHealth();
 
@@ -120,20 +110,17 @@ const initializeModel = async () => {
       );
     }
 
-    console.log("✅ Ollama is running");
+    console.log("Ollama is running");
 
-    // Check if model is available
     console.log(`Checking if model ${modelName} is available...`);
     const modelAvailable = await checkModelAvailability();
 
     if (!modelAvailable) {
-      console.warn(`⚠️  Model ${modelName} not found. Attempting to pull...`);
-      // Note: We can't pull the model from here, user needs to do it manually
+      console.warn(` Model ${modelName} not found. Attempting to pull...`);
     }
 
     const ollamaProvider = createOllama({
       baseURL,
-      // Optimized fetch with better timeout handling
       fetch: async (url, options) => {
         const controller = new AbortController();
         const timeoutId = setTimeout(() => {
@@ -177,22 +164,18 @@ const initializeModel = async () => {
       },
     });
 
-    // Create the chat model with optimized settings
     model = ollamaProvider.chat(modelName, {
-      // Remove temperature and other unsupported options
-      // Keep only basic configuration
     });
 
-    console.log("✅ Model initialized successfully");
+    console.log(" Model initialized successfully");
   } catch (error) {
-    console.error("❌ Failed to initialize model:", error);
+    console.error(" Failed to initialize model:", error);
     throw new Error(
       `Model initialization failed: ${error instanceof Error ? error.message : "Unknown error"}`
     );
   }
 };
 
-// Initialize model synchronously for now, but provide better error messages
 try {
   const ollamaProvider = createOllama({ baseURL });
   model = ollamaProvider.chat(modelName);
@@ -205,10 +188,9 @@ try {
 
 export { model, initializeModel, checkOllamaHealth, checkModelAvailability };
 
-// Log configuration (without sensitive data)
 console.log(`Configuration loaded:`);
 console.log(`- Model: ${modelName}`);
-console.log(`- Base URL: ${baseURL.replace(/\/\/.*@/, "//***@")}`); // Hide credentials in URL
+console.log(`- Base URL: ${baseURL.replace(/\/\/.*@/, "//***@")}`); 
 console.log(`- Environment: ${nodeEnv}`);
 console.log(`- Rate Limiting: ${enableRateLimiting ? "Enabled" : "Disabled"}`);
 console.log(`- Request Timeout: ${requestTimeout}ms`);

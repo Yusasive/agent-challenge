@@ -22,7 +22,7 @@ The Smart Contract Auditor Agent is designed with security as a top priority. Th
 
 ### Input Validation
 ```typescript
-// All inputs are validated using Zod schemas
+
 const contractCodeSchema = z.string()
   .min(1, "Contract code cannot be empty")
   .max(50000, "Contract code too large (max 50KB)")
@@ -86,13 +86,11 @@ If you discover a security vulnerability, please:
 
 ### Automated Tests
 ```bash
-# Run security tests
+
 node tests/security.test.js
 
-# Check for vulnerabilities in dependencies
 npm audit
 
-# Lint for security issues
 npm run lint
 ```
 
@@ -133,13 +131,12 @@ npm run lint
 
 ### Environment Variables
 ```bash
-# Required for production
+
 NODE_ENV=production
 ENABLE_RATE_LIMITING=true
 MAX_REQUESTS_PER_MINUTE=60
 LOG_LEVEL=warn
 
-# Never commit these to version control
 API_KEYS=use-environment-variables
 SECRETS=use-secure-storage
 ```

@@ -4,9 +4,7 @@ import { RateLimiter, createSecureLogger } from "../utils/input-validation";
 const logger = createSecureLogger();
 const rateLimiter = new RateLimiter(maxRequestsPerMinute);
 
-// Security middleware for request validation
 export const securityMiddleware = {
-  // Rate limiting middleware
   rateLimit: (req: any, res: any, next: any) => {
     if (!enableRateLimiting) {
       return next();
@@ -17,7 +15,7 @@ export const securityMiddleware = {
     if (!rateLimiter.isAllowed(identifier)) {
       const remaining = rateLimiter.getRemainingRequests(identifier);
       logger.warn('Rate limit exceeded', { 
-        identifier: identifier.substring(0, 10) + '...', // Partial IP for privacy
+        identifier: identifier.substring(0, 10) + '...', 
         remaining 
       });
       
@@ -31,10 +29,9 @@ export const securityMiddleware = {
     next();
   },
 
-  // Input validation middleware
   validateInput: (req: any, res: any, next: any) => {
     try {
-      // Validate content type
+    
       if (req.method === 'POST' && !req.headers['content-type']?.includes('application/json')) {
         return res.status(400).json({
           error: 'Invalid content type',
@@ -42,9 +39,8 @@ export const securityMiddleware = {
         });
       }
 
-      // Validate request size
       const contentLength = parseInt(req.headers['content-length'] || '0');
-      if (contentLength > 1024 * 1024) { // 1MB limit
+      if (contentLength > 1024 * 1024) { 
         return res.status(413).json({
           error: 'Request too large',
           message: 'Request body exceeds maximum size limit'
@@ -61,22 +57,19 @@ export const securityMiddleware = {
     }
   },
 
-  // Security headers middleware
   securityHeaders: (req: any, res: any, next: any) => {
-    // Set security headers
+ 
     res.setHeader('X-Content-Type-Options', 'nosniff');
     res.setHeader('X-Frame-Options', 'DENY');
     res.setHeader('X-XSS-Protection', '1; mode=block');
     res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
     res.setHeader('Content-Security-Policy', "default-src 'self'");
-    
-    // Remove server information
+   
     res.removeHeader('X-Powered-By');
     
     next();
   },
 
-  // Error handling middleware
   errorHandler: (error: any, req: any, res: any, next: any) => {
     logger.error('Request error', { 
       error: error instanceof Error ? error.message : 'Unknown error',
@@ -84,7 +77,6 @@ export const securityMiddleware = {
       method: req.method
     });
 
-    // Don't expose internal errors in production
     const isDevelopment = process.env.NODE_ENV === 'development';
     
     res.status(500).json({

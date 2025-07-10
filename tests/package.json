@@ -1,0 +1,17 @@
+{
+  "name": "smart-contract-auditor-tests",
+  "version": "1.0.0",
+  "description": "Test suite for Smart Contract Auditor Agent",
+  "scripts": {
+    "test": "mocha **/*.test.js --timeout 30000",
+    "test:unit": "mocha unit/**/*.test.js --timeout 30000",
+    "test:integration": "mocha integration/**/*.test.js --timeout 60000",
+    "test:watch": "mocha **/*.test.js --watch --timeout 30000",
+    "test:coverage": "nyc mocha **/*.test.js --timeout 30000"
+  },
+  "devDependencies": {
+    "mocha": "^10.2.0",
+    "nyc": "^15.1.0",
+    "chai": "^4.3.7"
+  }
+}

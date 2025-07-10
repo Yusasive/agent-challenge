@@ -18,7 +18,6 @@ if (missingEnvVars.length > 0) {
   );
 }
 
-
 export const modelName = process.env.MODEL_NAME_AT_ENDPOINT ?? "qwen2.5:1.5b";
 export const baseURL = process.env.API_BASE_URL ?? "http://127.0.0.1:11434/api";
 
@@ -33,8 +32,8 @@ export const nodeEnv = process.env.NODE_ENV ?? "development";
 export const requestTimeout = parseInt(
   process.env.REQUEST_TIMEOUT ?? "30000",
   10
-); 
-export const modelTimeout = parseInt(process.env.MODEL_TIMEOUT ?? "25000", 10); 
+);
+export const modelTimeout = parseInt(process.env.MODEL_TIMEOUT ?? "25000", 10);
 
 if (isNaN(maxRequestsPerMinute) || maxRequestsPerMinute <= 0) {
   throw new Error("MAX_REQUESTS_PER_MINUTE must be a positive number");
@@ -49,7 +48,7 @@ const checkOllamaHealth = async (): Promise<boolean> => {
     const healthUrl = baseURL.replace("/api", "") + "/api/tags";
     const response = await fetch(healthUrl, {
       method: "GET",
-      signal: AbortSignal.timeout(5000), 
+      signal: AbortSignal.timeout(5000),
     });
     return response.ok;
   } catch (error) {
@@ -100,7 +99,6 @@ let model: LanguageModelV1;
 
 const initializeModel = async () => {
   try {
- 
     console.log("Checking Ollama connection...");
     const isHealthy = await checkOllamaHealth();
 
@@ -164,8 +162,7 @@ const initializeModel = async () => {
       },
     });
 
-    model = ollamaProvider.chat(modelName, {
-    });
+    model = ollamaProvider.chat(modelName, {});
 
     console.log(" Model initialized successfully");
   } catch (error) {
@@ -190,7 +187,7 @@ export { model, initializeModel, checkOllamaHealth, checkModelAvailability };
 
 console.log(`Configuration loaded:`);
 console.log(`- Model: ${modelName}`);
-console.log(`- Base URL: ${baseURL.replace(/\/\/.*@/, "//***@")}`); 
+console.log(`- Base URL: ${baseURL.replace(/\/\/.*@/, "//***@")}`);
 console.log(`- Environment: ${nodeEnv}`);
 console.log(`- Rate Limiting: ${enableRateLimiting ? "Enabled" : "Disabled"}`);
 console.log(`- Request Timeout: ${requestTimeout}ms`);

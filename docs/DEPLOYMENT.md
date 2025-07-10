@@ -36,27 +36,37 @@ This guide covers deploying the Smart Contract Auditor Agent to various environm
 ### 1. Build Optimized Image
 
 ```bash
-# Build with build args for optimization
+# Build production-optimized image
 docker build \
+  --target production \
   --build-arg NODE_ENV=production \
-  --tag yourusername/smart-contract-auditor:latest \
-  --tag yourusername/smart-contract-auditor:v1.0.0 \
+  --tag yusasive/smart-contract-auditor:latest \
+  --tag yusasive/smart-contract-auditor:optimized \
   .
 
-# Verify image size
-docker images yourusername/smart-contract-auditor:latest
+# Build CPU-optimized version (no GPU)
+docker build \
+  --target production \
+  --build-arg NODE_ENV=production \
+  --build-arg ENABLE_GPU=false \
+  --tag yusasive/smart-contract-auditor:cpu-optimized \
+  .
+
+# Compare image sizes
+docker images yusasive/smart-contract-auditor
 ```
 
 ### 2. Test Locally
 
 ```bash
-# Run with production settings
+# Test optimized image
 docker run -d \
   --name auditor-test \
   -p 8080:8080 \
   -e NODE_ENV=production \
   -e ENABLE_RATE_LIMITING=true \
-  yourusername/smart-contract-auditor:latest
+  -e MAX_CONCURRENT_ANALYSIS=2 \
+  yusasive/smart-contract-auditor:optimized
 
 # Test health check
 curl http://localhost:8080/health
@@ -76,25 +86,53 @@ docker stop auditor-test && docker rm auditor-test
 # Login to Docker Hub
 docker login
 
-# Push both tags
-docker push yourusername/smart-contract-auditor:latest
-docker push yourusername/smart-contract-auditor:v1.0.0
+# Push optimized images
+docker push yusasive/smart-contract-auditor:latest
+docker push yusasive/smart-contract-auditor:optimized
+docker push yusasive/smart-contract-auditor:cpu-optimized
 ```
 
 ## 🌐 Nosana Deployment
 
-### 1. Update Job Definition
+### 1. Automated Deployment Script
 
-Edit `nos_job_def/nosana_mastra.json`:
+```bash
+# Use the comprehensive deployment script
+./scripts/deploy-to-nosana.sh
+
+# Or deploy with specific options
+./scripts/deploy-to-nosana.sh --image yusasive/smart-contract-auditor --tag optimized
+```
+
+### 2. Manual Deployment Options
+
+#### Option A: GPU-Optimized (Recommended)
+```bash
+nosana job post --file ./nos_job_def/nosana_mastra.json --market nvidia-3060 --timeout 30
+```
+
+#### Option B: CPU-Only (Cost-Effective)
+```bash
+nosana job post --file ./nos_job_def/nosana_cpu_optimized.json --market cpu-optimized --timeout 30
+```
+
+#### Option C: High-Performance (Premium)
+```bash
+nosana job post --file ./nos_job_def/nosana_gpu_optimized.json --market nvidia-3090 --timeout 30
+```
+
+### 3. Job Definition Examples
+
+**GPU-Optimized** (`nos_job_def/nosana_mastra.json`):
 
 ```json
 {
   "ops": [
     {
-      "id": "smart-contract-auditor",
+      "id": "smart-contract-auditor-gpu",
       "args": {
         "gpu": true,
-        "image": "docker.io/yourusername/smart-contract-auditor:latest",
+        "image": "docker.io/yusasive/smart-contract-auditor:optimized",
         "expose": [
           {
             "port": 8080,
@@ -104,16 +142,21 @@ Edit `nos_job_def/nosana_mastra.json`:
                 "type": "http",
                 "method": "GET",
                 "expected_status": 200,
-                "continuous": true
+                "continuous": true,
+                "interval": 30
               }
             ]
           }
         ],
         "env": {
           "NODE_ENV": "production",
+          "MODEL_NAME_AT_ENDPOINT": "qwen2.5:1.5b",
           "ENABLE_RATE_LIMITING": "true",
-          "MAX_REQUESTS_PER_MINUTE": "60",
-          "LOG_LEVEL": "warn"
+          "MAX_REQUESTS_PER_MINUTE": "60"
+        },
+        "resources": {
+          "memory": "6Gi",
+          "cpu": "2"
         },
         "entrypoint": ["/bin/sh"]
       },
@@ -124,7 +167,8 @@ Edit `nos_job_def/nosana_mastra.json`:
     "trigger": "dashboard",
     "system_requirements": {
       "required_vram": 4,
-      "required_ram": 8
+      "required_ram": 6,
+      "required_cpu": 2
     }
   },
   "type": "container",
@@ -132,37 +176,47 @@ Edit `nos_job_def/nosana_mastra.json`:
 }
 ```
 
-### 2. Deploy with Nosana CLI
+### 4. Deployment Verification
 
 ```bash
-# Install Nosana CLI (if not already installed)
-npm install -g @nosana/cli
+# Verify deployment automatically
+./scripts/verify-deployment.sh
 
-# Check wallet balance
-nosana address
-nosana balance
+# Monitor costs and performance
+./scripts/monitor-costs.sh <job-id>
 
-# Deploy to Nosana
-nosana job post \
-  --file ./nos_job_def/nosana_mastra.json \
-  --market nvidia-3060 \
-  --timeout 30
-
-# Monitor deployment
-nosana job list
+# Manual verification
+curl https://<deployment-url>/health
+curl -X POST https://<deployment-url>/agents/smartContractAuditorAgent/chat \
+  -H "Content-Type: application/json" \
+  -d '{"message": "Test deployment"}'
 ```
 
-### 3. Verify Deployment
+### 5. Resource Optimization
 
 ```bash
-# Get job details
-nosana job get <JOB_ID>
+# Optimize resources before deployment
+./scripts/optimize-resources.sh
 
-# Check logs
-nosana job logs <JOB_ID>
+# This creates:
+# - Optimized Docker images
+# - Resource-efficient job definitions
+# - Cost monitoring tools
+# - Performance benchmarks
+```
 
-# Test deployed endpoint
-curl https://<NOSANA_ENDPOINT>/health
+## 📊 Deployment Monitoring
+
+### Real-time Monitoring
+```bash
+# Monitor deployment status
+watch -n 30 'nosana job get <JOB_ID> | jq ".status, .metrics"'
+
+# Monitor resource usage
+./scripts/monitor-costs.sh <JOB_ID>
+
+# Check application logs
+nosana job logs <JOB_ID> --follow
 ```
 
 ## 🔧 Environment Configuration

@@ -1,0 +1,39 @@
+{
+  "name": "smart-contract-auditor-cli",
+  "version": "1.0.0",
+  "description": "Command-line interface for Smart Contract Auditor Agent",
+  "main": "dist/index.js",
+  "bin": {
+    "sca": "dist/cli.js",
+    "smart-contract-auditor": "dist/cli.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/cli.js",
+    "dev": "ts-node src/cli.ts"
+  },
+  "keywords": [
+    "smart-contract",
+    "security",
+    "audit",
+    "cli",
+    "solidity",
+    "blockchain"
+  ],
+  "dependencies": {
+    "commander": "^11.0.0",
+    "axios": "^1.6.0",
+    "chalk": "^4.1.2",
+    "ora": "^5.4.1",
+    "inquirer": "^8.2.5",
+    "fs-extra": "^11.1.1",
+    "glob": "^10.3.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@types/inquirer": "^8.2.6",
+    "@types/fs-extra": "^11.0.1",
+    "typescript": "^5.0.0",
+    "ts-node": "^10.9.0"
+  }
+}

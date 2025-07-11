@@ -1,0 +1,94 @@
+{
+  "name": "smart-contract-auditor",
+  "displayName": "Smart Contract Auditor",
+  "description": "AI-powered smart contract security analysis directly in VS Code",
+  "version": "1.0.0",
+  "publisher": "smart-contract-auditor",
+  "engines": {
+    "vscode": "^1.74.0"
+  },
+  "categories": [
+    "Linters",
+    "Other"
+  ],
+  "keywords": [
+    "solidity",
+    "smart-contract",
+    "security",
+    "audit",
+    "blockchain"
+  ],
+  "activationEvents": [
+    "onLanguage:solidity"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "smartContractAuditor.analyzeContract",
+        "title": "Analyze Contract",
+        "category": "Smart Contract Auditor"
+      },
+      {
+        "command": "smartContractAuditor.analyzeCurrentFile",
+        "title": "Analyze Current File",
+        "category": "Smart Contract Auditor"
+      },
+      {
+        "command": "smartContractAuditor.generateReport",
+        "title": "Generate Audit Report",
+        "category": "Smart Contract Auditor"
+      }
+    ],
+    "menus": {
+      "editor/context": [
+        {
+          "when": "resourceExtname == .sol",
+          "command": "smartContractAuditor.analyzeCurrentFile",
+          "group": "navigation"
+        }
+      ],
+      "explorer/context": [
+        {
+          "when": "resourceExtname == .sol",
+          "command": "smartContractAuditor.analyzeContract",
+          "group": "navigation"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "Smart Contract Auditor",
+      "properties": {
+        "smartContractAuditor.apiUrl": {
+          "type": "string",
+          "default": "http://localhost:8080",
+          "description": "URL of the Smart Contract Auditor Agent API"
+        },
+        "smartContractAuditor.enableRealTimeAnalysis": {
+          "type": "boolean",
+          "default": false,
+          "description": "Enable real-time analysis as you type"
+        },
+        "smartContractAuditor.analysisDepth": {
+          "type": "string",
+          "enum": ["basic", "intermediate", "deep"],
+          "default": "intermediate",
+          "description": "Depth of security analysis"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.74.0",
+    "@types/node": "16.x",
+    "typescript": "^4.9.4"
+  },
+  "dependencies": {
+    "axios": "^1.6.0"
+  }
+}

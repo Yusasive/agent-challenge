@@ -11,6 +11,8 @@ The **Smart Contract Auditor Agent** is an advanced AI-powered security analysis
 ### Core Capabilities
 
 - **🛡️ Advanced Security Analysis**: Multi-layered vulnerability detection using OWASP, SWC registry patterns, and formal methods
+- **🌐 Multi-Chain Support**: Analysis for Ethereum, BSC, Polygon, Arbitrum, and Optimism with chain-specific vulnerability detection
+- **👥 Accessibility Features**: Simplified explanations and visual summaries for non-technical users
 - **🤖 ML-Based Anomaly Detection**: Machine learning algorithms to identify novel attack vectors and suspicious patterns
 - **🔬 Formal Verification**: Model checking, symbolic execution, and abstract interpretation for mathematical proof of correctness
 - **📊 Advanced Static Analysis**: Control flow analysis, data flow analysis, and taint analysis
@@ -18,6 +20,7 @@ The **Smart Contract Auditor Agent** is an advanced AI-powered security analysis
 - **📊 Professional Reports**: Generate detailed audit reports in markdown format
 - **🔧 Multi-Tool Analysis**: Contract analyzer, vulnerability checker, and gas optimizer tools
 - **🎯 Real-time Chat**: Interactive agent interface for contract analysis
+- **🔌 Developer Integrations**: VS Code extension, Hardhat plugin, and CLI tool for seamless workflow integration
 
 ### Security Features
 
@@ -36,6 +39,8 @@ src/mastra/agents/smart-contract-auditor/
 ├── contract-analyzer-tool.ts     # Core contract analysis
 ├── vulnerability-checker-tool.ts # Security vulnerability detection
 ├── gas-optimizer-tool.ts         # Gas optimization analysis
+├── multi-chain-analyzer.ts      # Multi-chain compatibility analysis
+├── accessibility-enhancer.ts    # Non-technical user accessibility
 ├── audit-report-generator.ts     # Professional report generation
 ├── advanced-static-analyzer.ts   # Control flow, data flow, and taint analysis
 ├── ml-anomaly-detector.ts        # Machine learning-based anomaly detection
@@ -319,6 +324,8 @@ Check deployment status at [Nosana Dashboard](https://dashboard.nosana.com/deplo
 ### Tool Functions
 
 - `analyze-smart-contract` - Comprehensive contract analysis
+- `multi-chain-analysis` - Multi-chain compatibility and chain-specific vulnerability detection
+- `enhance-accessibility` - Make audit results accessible to non-technical users
 - `advanced-static-analysis` - Control flow, data flow, and taint analysis
 - `ml-anomaly-detection` - Machine learning-based anomaly detection
 - `formal-verification` - Model checking and symbolic execution

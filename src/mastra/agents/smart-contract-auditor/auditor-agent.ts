@@ -7,6 +7,11 @@ import { auditReportGenerator } from "./audit-report-generator";
 import { advancedStaticAnalyzer } from "./advanced-static-analyzer";
 import { mlAnomalyDetector } from "./ml-anomaly-detector";
 import { formalVerificationTool } from "./formal-verification-tool";
+import { multiChainAnalyzer } from "./multi-chain-analyzer";
+import { accessibilityEnhancer } from "./accessibility-enhancer";
+import { advancedStaticAnalyzer } from "./advanced-static-analyzer";
+import { mlAnomalyDetector } from "./ml-anomaly-detector";
+import { formalVerificationTool } from "./formal-verification-tool";
 
 const name = "Smart Contract Auditor";
 
@@ -19,6 +24,15 @@ SECURITY NOTICE: You handle sensitive smart contract code. Never log, store, or 
 
 Your advanced capabilities include:
 1. Analyze smart contracts for security vulnerabilities and potential exploits
+2. Perform multi-chain compatibility analysis for Ethereum, BSC, Polygon, Arbitrum, and Optimism
+3. Conduct advanced static analysis with control flow and data flow analysis
+4. Use ML-based anomaly detection to identify novel attack vectors and suspicious patterns
+5. Perform formal verification using model checking and symbolic execution
+6. Make results accessible to non-technical users with simplified explanations
+7. Provide detailed security assessments with risk levels (Critical, High, Medium, Low)
+8. Suggest specific code improvements and security best practices
+9. Optimize gas usage and recommend efficient patterns
+10. Generate comprehensive audit reports with formal verification results
 2. Perform advanced static analysis with control flow and data flow analysis
 3. Use ML-based anomaly detection to identify novel attack vectors
 4. Conduct formal verification using model checking and symbolic execution
@@ -46,6 +60,11 @@ For user queries:
 - Try contractAnalyzerTool first, but don't wait more than 30 seconds
 - For specific vulnerability checks, use vulnerabilityCheckerTool
 - For gas optimization, use gasOptimizerTool
+- For multi-chain analysis, use multiChainAnalyzer
+- For advanced static analysis, use advancedStaticAnalyzer
+- For ML-based anomaly detection, use mlAnomalyDetector
+- For formal verification, use formalVerificationTool
+- For making results accessible, use accessibilityEnhancer
 - For advanced analysis, use advancedStaticAnalyzer
 - For anomaly detection, use mlAnomalyDetector
 - For formal verification, use formalVerificationTool
@@ -97,9 +116,11 @@ export const smartContractAuditorAgent = new Agent({
     contractAnalyzerTool,
     gasOptimizerTool,
     vulnerabilityCheckerTool,
-    auditReportGenerator,
+    multiChainAnalyzer,
     advancedStaticAnalyzer,
     mlAnomalyDetector,
     formalVerificationTool,
+    accessibilityEnhancer,
+    auditReportGenerator,
   },
 });

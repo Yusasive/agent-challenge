@@ -2,12 +2,9 @@
 
 The Smart Contract Auditor Agent provides seamless integrations with popular development tools to enhance your workflow.
 
-<<<<<<< HEAD
+ 
 ##  Available Integrations
-=======
-## 🔌 Available Integrations
->>>>>>> 9fe0422b6fd227d2cb8aa8feee97ce4b030971ab
-
+ 
 ### 1. VS Code Extension
 
 **Installation:**
@@ -116,12 +113,9 @@ sca health
 }
 ```
 
-<<<<<<< HEAD
+ 
 ##  Multi-Chain Analysis
-=======
-## 🌐 Multi-Chain Analysis
->>>>>>> 9fe0422b6fd227d2cb8aa8feee97ce4b030971ab
-
+ 
 ### Supported Chains
 
 - **Ethereum** (Mainnet)
@@ -173,12 +167,9 @@ console.log('Chain-specific issues:', result.chainSpecificIssues);
 console.log('Cross-chain compatible:', result.crossChainCompatibility.compatible);
 ```
 
-<<<<<<< HEAD
+ 
 ##  Accessibility Features
-=======
-## 👥 Accessibility Features
->>>>>>> 9fe0422b6fd227d2cb8aa8feee97ce4b030971ab
-
+ 
 ### Simplified Reports
 
 The accessibility enhancer makes technical audit results understandable for:
@@ -218,13 +209,9 @@ console.log('Overall risk:', accessibleReport.simplifiedSummary.overallRisk);
 console.log('Action required:', accessibleReport.simplifiedSummary.actionRequired);
 console.log('Security grade:', accessibleReport.visualSummary.securityGrade);
 ```
-
-<<<<<<< HEAD
+ 
 ##  Custom Integrations
-=======
-## 🔧 Custom Integrations
->>>>>>> 9fe0422b6fd227d2cb8aa8feee97ce4b030971ab
-
+ 
 ### REST API Integration
 
 ```javascript
@@ -269,13 +256,9 @@ app.post('/webhook/contract-deployed', async (req, res) => {
   res.json({ status: 'analyzed' });
 });
 ```
-
-<<<<<<< HEAD
+ 
 ##  CI/CD Integration
-=======
-## 📊 CI/CD Integration
->>>>>>> 9fe0422b6fd227d2cb8aa8feee97ce4b030971ab
-
+ 
 ### GitHub Actions
 
 ```yaml
@@ -335,12 +318,9 @@ audit:
     expire_in: 1 week
 ```
 
-<<<<<<< HEAD
+ 
 ##  Best Practices
-=======
-## 🎯 Best Practices
->>>>>>> 9fe0422b6fd227d2cb8aa8feee97ce4b030971ab
-
+ 
 ### Development Workflow
 
 1. **Pre-commit Analysis**: Use VS Code extension for real-time feedback

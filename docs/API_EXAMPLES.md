@@ -2,11 +2,7 @@
 
 This document provides comprehensive examples of how to use the Smart Contract Auditor Agent API.
 
-<<<<<<< HEAD
 ##  Table of Contents
-=======
-## 📚 Table of Contents
->>>>>>> 9fe0422b6fd227d2cb8aa8feee97ce4b030971ab
 
 - [Basic Usage](#basic-usage)
 - [Tool-Specific Examples](#tool-specific-examples)
@@ -15,11 +11,9 @@ This document provides comprehensive examples of how to use the Smart Contract A
 - [Error Handling](#error-handling)
 - [Integration Examples](#integration-examples)
 
-<<<<<<< HEAD
+
 ##  Basic Usage
-=======
-## 🚀 Basic Usage
->>>>>>> 9fe0422b6fd227d2cb8aa8feee97ce4b030971ab
+
 
 ### Simple Contract Analysis
 
@@ -83,11 +77,7 @@ contract Vulnerable {
 });
 ```
 
-<<<<<<< HEAD
 ##  Tool-Specific Examples
-=======
-## 🔧 Tool-Specific Examples
->>>>>>> 9fe0422b6fd227d2cb8aa8feee97ce4b030971ab
 
 ### Contract Analyzer Tool
 
@@ -144,13 +134,10 @@ if (gasOptimization.optimizedCode) {
   console.log('Optimized Code:', gasOptimization.optimizedCode);
 }
 ```
+ 
 
-<<<<<<< HEAD
 ##  Advanced Analysis
-=======
-## 🧠 Advanced Analysis
->>>>>>> 9fe0422b6fd227d2cb8aa8feee97ce4b030971ab
-
+ 
 ### ML Anomaly Detection
 
 ```javascript
@@ -253,11 +240,7 @@ contract ComplexContract {
 });
 ```
 
-<<<<<<< HEAD
 ##  Configuration Examples
-=======
-## ⚙️ Configuration Examples
->>>>>>> 9fe0422b6fd227d2cb8aa8feee97ce4b030971ab
 
 ### Custom Analysis Configuration
 
@@ -294,11 +277,8 @@ const analysisWithTimeout = await fetch('http://localhost:8080/agents/smartContr
 });
 ```
 
-<<<<<<< HEAD
+
 ##  Error Handling
-=======
-## 🚨 Error Handling
->>>>>>> 9fe0422b6fd227d2cb8aa8feee97ce4b030971ab
 
 ### Handling Analysis Timeouts
 
@@ -364,11 +344,8 @@ async function analyzeLargeContract(contractCode) {
 }
 ```
 
-<<<<<<< HEAD
+
 ##  Integration Examples
-=======
-## 🔗 Integration Examples
->>>>>>> 9fe0422b6fd227d2cb8aa8feee97ce4b030971ab
 
 ### Node.js Integration
 
@@ -497,11 +474,7 @@ if [ ! -f "$CONTRACT_FILE" ]; then
     exit 1
 fi
 
-<<<<<<< HEAD
 echo " Analyzing contract: $CONTRACT_FILE"
-=======
-echo "🔍 Analyzing contract: $CONTRACT_FILE"
->>>>>>> 9fe0422b6fd227d2cb8aa8feee97ce4b030971ab
 
 CONTRACT_CODE=$(cat "$CONTRACT_FILE")
 
@@ -510,17 +483,10 @@ curl -X POST "$AGENT_URL" \
   -d "{\"message\": \"Generate a comprehensive security audit report for this contract: $CONTRACT_CODE\"}" \
   | jq -r '.result' > "audit-report-$(basename "$CONTRACT_FILE" .sol).md"
 
-<<<<<<< HEAD
 echo " Audit complete! Report saved to audit-report-$(basename "$CONTRACT_FILE" .sol).md"
 ```
 
 ##  Response Format Examples
-=======
-echo "✅ Audit complete! Report saved to audit-report-$(basename "$CONTRACT_FILE" .sol).md"
-```
-
-## 📊 Response Format Examples
->>>>>>> 9fe0422b6fd227d2cb8aa8feee97ce4b030971ab
 
 ### Successful Analysis Response
 
@@ -565,11 +531,7 @@ echo "✅ Audit complete! Report saved to audit-report-$(basename "$CONTRACT_FIL
 
 ---
 
-<<<<<<< HEAD
 ##  Best Practices
-=======
-## 🎯 Best Practices
->>>>>>> 9fe0422b6fd227d2cb8aa8feee97ce4b030971ab
 
 1. **Always handle timeouts** - Large contracts may take time to analyze
 2. **Use appropriate analysis depth** - Deep analysis for critical contracts, basic for quick checks

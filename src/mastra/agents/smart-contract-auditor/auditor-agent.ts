@@ -9,11 +9,7 @@ import { accessibilityEnhancer } from "./accessibility-enhancer";
 import { advancedStaticAnalyzer } from "./advanced-static-analyzer";
 import { mlAnomalyDetector } from "./ml-anomaly-detector";
 import { formalVerificationTool } from "./formal-verification-tool";
-import { multiChainAnalyzer } from "./multi-chain-analyzer";
-import { accessibilityEnhancer } from "./accessibility-enhancer";
-import { advancedStaticAnalyzer } from "./advanced-static-analyzer";
-import { mlAnomalyDetector } from "./ml-anomaly-detector";
-import { formalVerificationTool } from "./formal-verification-tool";
+
 
 const name = "Smart Contract Auditor";
 

@@ -203,23 +203,7 @@ curl -X POST https://<deployment-url>/agents/smartContractAuditorAgent/chat \
 # - Resource-efficient job definitions
 # - Cost monitoring tools
 # - Performance benchmarks
-<<<<<<< HEAD
-=======
-```
 
-## 📊 Deployment Monitoring
-
-### Real-time Monitoring
-```bash
-# Monitor deployment status
-watch -n 30 'nosana job get <JOB_ID> | jq ".status, .metrics"'
-
-# Monitor resource usage
-./scripts/monitor-costs.sh <JOB_ID>
-
-# Check application logs
-nosana job logs <JOB_ID> --follow
->>>>>>> 9fe0422b6fd227d2cb8aa8feee97ce4b030971ab
 ```
 
 ##  Deployment Monitoring

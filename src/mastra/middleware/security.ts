@@ -87,7 +87,6 @@ export const securityMiddleware = {
   }
 };
 
-// Health check endpoint
 export const healthCheck = (req: any, res: any) => {
   res.status(200).json({
     status: 'healthy',

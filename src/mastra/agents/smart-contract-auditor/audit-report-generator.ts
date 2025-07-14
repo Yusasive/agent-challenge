@@ -115,30 +115,26 @@ const generateComprehensiveReport = async (
       location: vuln.location,
     }))
   ];
-
-  // Count findings by severity
+ 
   const findings = {
     critical: allFindings.filter(f => f.severity === 'Critical').length,
     high: allFindings.filter(f => f.severity === 'High').length,
     medium: allFindings.filter(f => f.severity === 'Medium').length,
     low: allFindings.filter(f => f.severity === 'Low').length,
   };
-
-  // Determine overall risk level
+ 
   let riskLevel = "Low";
   if (findings.critical > 0) riskLevel = "Critical";
   else if (findings.high > 0) riskLevel = "High";
   else if (findings.medium > 2) riskLevel = "Medium";
-
-  // Generate executive summary
+ 
   const executiveSummary = generateExecutiveSummary(
     contractName,
     analysisResults.securityScore,
     findings,
     riskLevel
   );
-
-  // Combine all recommendations
+ 
   const recommendations = [
     ...vulnerabilityResults.recommendations,
     ...gasResults.optimizations.map((opt: any) => opt.recommendation),
@@ -146,8 +142,7 @@ const generateComprehensiveReport = async (
     "Consider formal verification for critical functions",
     "Set up continuous security monitoring",
   ];
-
-  // Generate conclusion
+ 
   const conclusion = generateConclusion(analysisResults.securityScore, riskLevel, findings);
 
   const report: AuditReport = {
@@ -162,11 +157,10 @@ const generateComprehensiveReport = async (
     gasOptimizations: gasResults.optimizations.map((opt: any) => 
       `${opt.type}: ${opt.description} (${opt.estimatedSavings})`
     ),
-    recommendations: recommendations.slice(0, 10), // Top 10 recommendations
+    recommendations: recommendations.slice(0, 10), 
     conclusion,
   };
 
-  // Generate markdown report
   const reportMarkdown = generateMarkdownReport(report);
 
   return {

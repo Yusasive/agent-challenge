@@ -78,9 +78,9 @@ function testInputValidation() {
     assert(!maliciousResult.contractCode.includes('<script>'), 'Script tags should be removed');
     assert(!maliciousResult.contractName.includes('<'), 'HTML should be removed from name');
     
-    console.log('✅ Input validation tests passed');
+    console.log(' Input validation tests passed');
   } catch (error) {
-    console.error('❌ Input validation test failed:', error.message);
+    console.error(' Input validation test failed:', error.message);
   }
 }
 
@@ -102,9 +102,9 @@ function testRateLimiting() {
     // Fourth request should be blocked
     assert(!limiter.isAllowed(identifier), 'Fourth request should be blocked');
     
-    console.log('✅ Rate limiting tests passed');
+    console.log(' Rate limiting tests passed');
   } catch (error) {
-    console.error('❌ Rate limiting test failed:', error.message);
+    console.error(' Rate limiting test failed:', error.message);
   }
 }
 
@@ -127,9 +127,9 @@ function testVulnerabilityDetection() {
     const secureHasReentrancy = testContracts.secure.includes('nonReentrant');
     assert(secureHasReentrancy, 'Secure contract should use reentrancy guard');
     
-    console.log('✅ Vulnerability detection tests passed');
+    console.log(' Vulnerability detection tests passed');
   } catch (error) {
-    console.error('❌ Vulnerability detection test failed:', error.message);
+    console.error(' Vulnerability detection test failed:', error.message);
   }
 }
 
@@ -162,9 +162,9 @@ function testLoggingSecurity() {
     assert(!logOutput.includes('secret-key-123'), 'API key should be redacted');
     assert(logOutput.includes('this should appear'), 'Normal data should appear');
     
-    console.log('✅ Logging security tests passed');
+    console.log(' Logging security tests passed');
   } catch (error) {
-    console.error('❌ Logging security test failed:', error.message);
+    console.error(' Logging security test failed:', error.message);
   }
 }
 
@@ -177,8 +177,8 @@ function runTests() {
   testVulnerabilityDetection();
   testLoggingSecurity();
   
-  console.log('\n✅ All security tests completed!');
-  console.log('📋 Manual testing checklist:');
+  console.log('\n All security tests completed!');
+  console.log(' Manual testing checklist:');
   console.log('  - Test agent with various contract types');
   console.log('  - Verify no sensitive data in logs');
   console.log('  - Check rate limiting in browser');

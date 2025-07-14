@@ -83,12 +83,11 @@ const analyzeContract = async (
   contractCode: string,
   contractName?: string
 ): Promise<AnalysisResult> => {
-  // Input validation and sanitization
+ 
   if (!contractCode || contractCode.trim().length === 0) {
     throw new Error("Contract code cannot be empty");
   }
-
-  // Remove potentially dangerous content
+ 
   const sanitizedCode = contractCode
     .replace(/<!--[\s\S]*?-->/g, "") 
     .replace(/<script[\s\S]*?<\/script>/gi, "")
@@ -109,8 +108,7 @@ const analyzeContract = async (
   if (!hasPragma && !hasContract) {
     throw new Error("Input does not appear to be valid Solidity code");
   }
-
-  // Security Analysis Patterns - optimized for speed
+ 
   const securityChecks = [
     {
       pattern: /\.call\s*\(/g,
@@ -159,8 +157,7 @@ const analyzeContract = async (
       impact: "Missing security features and potential vulnerabilities",
     },
   ];
-
-  // Quick reentrancy check
+ 
   const hasExternalCalls = /\.call\(|\.send\(|\.transfer\(/.test(sanitizedCode);
   const hasStateChangesAfterCalls = checkReentrancyPattern(sanitizedCode);
 
@@ -175,8 +172,7 @@ const analyzeContract = async (
       impact: "Attackers can drain contract funds through recursive calls",
     });
   }
-
-  // Check for integer overflow/underflow (pre-0.8.0)
+ 
   const solidityVersion = sanitizedCode.match(
     /pragma\s+solidity\s+\^?([0-9]+\.[0-9]+)/
   )?.[1];
@@ -195,9 +191,7 @@ const analyzeContract = async (
           "Arithmetic operations can overflow/underflow leading to unexpected behavior",
       });
     }
-  }
-
-  // Run pattern-based checks (limit to first 100 lines for performance)
+  } 
   const linesToCheck = Math.min(lines.length, 100);
   for (let i = 0; i < linesToCheck; i++) {
     const line = lines[i];
@@ -215,8 +209,7 @@ const analyzeContract = async (
       }
     }
   }
-
-  // Quick gas optimization suggestions
+ 
   if (sanitizedCode.includes("public") && sanitizedCode.includes("view")) {
     gasOptimizations.push(
       "Consider using 'external' instead of 'public' for functions only called externally"
@@ -228,8 +221,7 @@ const analyzeContract = async (
       "Consider using smaller uint types when possible to pack structs efficiently"
     );
   }
-
-  // Calculate security score
+ 
   const criticalCount = issues.filter((i) => i.severity === "Critical").length;
   const highCount = issues.filter((i) => i.severity === "High").length;
   const mediumCount = issues.filter((i) => i.severity === "Medium").length;
@@ -239,8 +231,7 @@ const analyzeContract = async (
     0,
     100 - (criticalCount * 25 + highCount * 15 + mediumCount * 8 + lowCount * 3)
   );
-
-  // Generate summary
+ 
   const summary = generateSummary(
     finalContractName,
     securityScore,

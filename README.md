@@ -2,15 +2,17 @@
 
 ![Smart Contract Auditor](./assets/NosanaBuildersChallengeAgents.jpg)
 
-## Overview
+##  Overview
 
 The **Smart Contract Auditor Agent** is an advanced AI-powered security analysis tool built for the Nosana Builders Challenge. It provides comprehensive smart contract security auditing capabilities using the Mastra framework, featuring automated vulnerability detection, gas optimization analysis, and professional audit report generation.
 
-## Features
+##  Features
 
 ### Core Capabilities
 
 - **Advanced Security Analysis**: Multi-layered vulnerability detection using OWASP, SWC registry patterns, and formal methods
+- **Multi-Chain Support**: Analysis for Ethereum, BSC, Polygon, Arbitrum, and Optimism with chain-specific vulnerability detection
+- **Accessibility Features**: Simplified explanations and visual summaries for non-technical users
 - **ML-Based Anomaly Detection**: Machine learning algorithms to identify novel attack vectors and suspicious patterns
 - **Formal Verification**: Model checking, symbolic execution, and abstract interpretation for mathematical proof of correctness
 - **Advanced Static Analysis**: Control flow analysis, data flow analysis, and taint analysis
@@ -18,6 +20,7 @@ The **Smart Contract Auditor Agent** is an advanced AI-powered security analysis
 - **Professional Reports**: Generate detailed audit reports in markdown format
 - **Multi-Tool Analysis**: Contract analyzer, vulnerability checker, and gas optimizer tools
 - **Real-time Chat**: Interactive agent interface for contract analysis
+- **Developer Integrations**: VS Code extension, Hardhat plugin, and CLI tool for seamless workflow integration
 
 ### Security Features
 
@@ -28,7 +31,7 @@ The **Smart Contract Auditor Agent** is an advanced AI-powered security analysis
 - **Rate Limiting**: Built-in protection against abuse (configurable)
 - **Secure Logging**: Structured logging without sensitive information exposure
 
-##  Architecture
+## Architecture
 
 ```
 src/mastra/agents/smart-contract-auditor/
@@ -36,6 +39,8 @@ src/mastra/agents/smart-contract-auditor/
 ├── contract-analyzer-tool.ts     # Core contract analysis
 ├── vulnerability-checker-tool.ts # Security vulnerability detection
 ├── gas-optimizer-tool.ts         # Gas optimization analysis
+├── multi-chain-analyzer.ts      # Multi-chain compatibility analysis
+├── accessibility-enhancer.ts    # Non-technical user accessibility
 ├── audit-report-generator.ts     # Professional report generation
 ├── advanced-static-analyzer.ts   # Control flow, data flow, and taint analysis
 ├── ml-anomaly-detector.ts        # Machine learning-based anomaly detection
@@ -43,7 +48,7 @@ src/mastra/agents/smart-contract-auditor/
 └── index.ts                      # Module exports
 ```
 
-##  Requirements
+## Requirements
 
 ### System Requirements
 
@@ -59,7 +64,7 @@ src/mastra/agents/smart-contract-auditor/
 - `zod`: Runtime type validation
 - `dotenv`: Environment configuration
 
-##  Installation & Setup
+## Installation & Setup
 
 ### 1. Clone and Install
 
@@ -96,6 +101,10 @@ curl -fsSL https://ollama.ai/install.sh | sh
 ```bash
 ollama serve
 ollama pull qwen2.5:1.5b
+
+or , To change ollam port
+$env:OLLAMA_HOST = "http://127.0.0.1:11500"
+
 ```
 
 **Start Development Server:**
@@ -106,7 +115,7 @@ pnpm run dev
 
 Navigate to `http://localhost:8080/agents/smartContractAuditorAgent/chat`
 
-##  Docker Deployment
+## Docker Deployment
 
 ### Build and Run Locally
 
@@ -292,7 +301,6 @@ nosana job post --file ./nos_job_def/nosana_mastra.json --market nvidia-3060 --t
 
 Check deployment status at [Nosana Dashboard](https://dashboard.nosana.com/deploy)
 
-##  Contributing
 
 ### Development Workflow
 
@@ -319,6 +327,8 @@ Check deployment status at [Nosana Dashboard](https://dashboard.nosana.com/deplo
 ### Tool Functions
 
 - `analyze-smart-contract` - Comprehensive contract analysis
+- `multi-chain-analysis` - Multi-chain compatibility and chain-specific vulnerability detection
+- `enhance-accessibility` - Make audit results accessible to non-technical users
 - `advanced-static-analysis` - Control flow, data flow, and taint analysis
 - `ml-anomaly-detection` - Machine learning-based anomaly detection
 - `formal-verification` - Model checking and symbolic execution
@@ -382,4 +392,4 @@ This project is licensed under the ISC License - see the LICENSE file for detail
 
 ---
 
-**Built for Nosana Builders Challenge 2025** 
+**Built for Nosana Builders Challenge 2025** 🏆

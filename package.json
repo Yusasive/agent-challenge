@@ -4,6 +4,18 @@
   "main": ".mastra/output/index.mjs",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
+    "test:unit": "mocha tests/unit/**/*.test.js --timeout 30000",
+    "test:integration": "mocha tests/integration/**/*.test.js --timeout 60000",
+    "test:all": "npm run test:unit && npm run test:integration",
+    "test:watch": "mocha tests/**/*.test.js --watch --timeout 30000",
+    "test:coverage": "nyc mocha tests/**/*.test.js --timeout 30000",
+    "deploy": "./scripts/deploy-to-nosana.sh",
+    "deploy:cpu": "nosana job post --file ./nos_job_def/nosana_cpu_optimized.json --market cpu-optimized --timeout 30",
+    "deploy:gpu": "nosana job post --file ./nos_job_def/nosana_gpu_optimized.json --market nvidia-3060 --timeout 30",
+    "deploy:premium": "nosana job post --file ./nos_job_def/nosana_mastra.json --market nvidia-3090 --timeout 30",
+    "verify-deployment": "./scripts/verify-deployment.sh",
+    "monitor-costs": "./scripts/monitor-costs.sh",
+    "optimize-resources": "./scripts/optimize-resources.sh",
     "deploy:agent": "nosana job post --file ./nos_job_def/nosana_mastra.json --market nvidia-3090 --timeout 30",
     "deploy:qwen": "nosana job post --file ./nos_job_def/qwen_nos_jb.json --market nvidia-3090 --timeout 30",
     "dev": "mastra dev",
@@ -11,7 +23,8 @@
     "start": "mastra start",
     "lint": "biome lint ./src",
     "format": "biome format ./src/** --write",
-    "check": "biome check ./src"
+    "check": "biome check ./src",
+    "validate-config": "node -e \"require('./src/mastra/config/settings.js').validateConfig()\""
   },
   "keywords": [],
   "author": "",

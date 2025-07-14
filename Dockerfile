@@ -10,6 +10,17 @@ RUN apt-get update && apt-get install -y \
   && npm install -g pnpm \
   && apt-get clean
 
+# Development stage
+FROM base AS development
+WORKDIR /app
+COPY package.json pnpm-lock.yaml ./
+RUN pnpm install --frozen-lockfile
+COPY . .
+RUN pnpm run build
+
+# Production stage (optimized)
+FROM base AS production
+
 # Create app directory and set proper permissions
 WORKDIR /app
 RUN chown -R 1000:1000 /app
@@ -17,11 +28,14 @@ RUN chown -R 1000:1000 /app
 # Copy package files first for better caching
 COPY package.json pnpm-lock.yaml ./
 
-# Install dependencies
-RUN pnpm install --frozen-lockfile
+# Install only production dependencies
+RUN pnpm install --frozen-lockfile --prod
 
 # Copy source code
 COPY . .
+
+#Install mastra
+RUN pnpm add mastra
 
 # Test for mastra installment version
 RUN pnpm exec mastra --version
@@ -29,18 +43,27 @@ RUN pnpm exec mastra --version
 # Build the project
 RUN pnpm run build
 
-# Remove development dependencies and source files to reduce image size
-RUN pnpm prune --prod \
-  && rm -rf src/ \
+# Remove development files and optimize for production
+RUN rm -rf src/ \
+  && rm -rf tests/ \
+  && rm -rf docs/ \
   && rm -rf node_modules/.cache \
+  && rm -rf node_modules/.pnpm \
   && rm -rf /tmp/* \
-  && rm -rf /var/tmp/*
+  && rm -rf /var/tmp/* \
+  && pnpm store prune
 
-# Set environment variables for production
+# Optimized environment variables
 ENV NODE_ENV=production
 ENV API_BASE_URL=http://127.0.0.1:11500/api
 ENV MODEL_NAME_AT_ENDPOINT=qwen2.5:1.5b
 ENV PORT=8080
+ENV MAX_CONCURRENT_ANALYSIS=2
+ENV ENABLE_CACHING=true
+ENV REQUEST_TIMEOUT=45000
+ENV ANALYSIS_TIMEOUT=90000
+ENV ENABLE_RATE_LIMITING=true
+ENV MAX_REQUESTS_PER_MINUTE=30
 
 # Create non-root user for security
 RUN groupadd -r appuser && useradd -r -g appuser appuser \
@@ -49,30 +72,30 @@ RUN groupadd -r appuser && useradd -r -g appuser appuser \
 # Expose port
 EXPOSE 8080
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
+# Optimized health check
+HEALTHCHECK --interval=20s --timeout=5s --start-period=30s --retries=3 \
   CMD curl -f http://localhost:8080/health || exit 1
 
 # Override the default entrypoint
 ENTRYPOINT ["/bin/sh", "-c"]
 
-# Optimized startup sequence with proper error handling
+# Optimized startup sequence with faster initialization
 CMD ["set -e && \
   echo 'Starting Ollama service...' && \
   ollama serve & \
   OLLAMA_PID=$! && \
-  echo 'Waiting for Ollama to be ready...' && \
-  timeout=60 && \
+  echo 'Waiting for Ollama (optimized)...' && \
+  timeout=45 && \
   while [ $timeout -gt 0 ] && ! curl -s http://127.0.0.1:11500/api/tags >/dev/null 2>&1; do \
-    echo \"Ollama not ready yet, waiting 2 seconds... ($timeout seconds remaining)\" && \
+    echo \"Ollama initializing... ($timeout seconds remaining)\" && \
     sleep 2 && \
     timeout=$((timeout-2)); \
   done && \
   if [ $timeout -le 0 ]; then \
-    echo 'Timeout waiting for Ollama to start' && \
+    echo 'Ollama startup timeout' && \
     exit 1; \
   fi && \
-  echo 'Ollama is ready! Pulling model...' && \
+  echo 'Pulling optimized model...' && \
   ollama pull ${MODEL_NAME_AT_ENDPOINT} && \
-  echo 'Starting Node.js application...' && \
+  echo 'Starting optimized application...' && \
   exec node .mastra/output/index.mjs"]

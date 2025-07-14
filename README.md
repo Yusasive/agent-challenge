@@ -11,8 +11,6 @@ The **Smart Contract Auditor Agent** is an advanced AI-powered security analysis
 ### Core Capabilities
 
 - **Advanced Security Analysis**: Multi-layered vulnerability detection using OWASP, SWC registry patterns, and formal methods
-- **Multi-Chain Support**: Analysis for Ethereum, BSC, Polygon, Arbitrum, and Optimism with chain-specific vulnerability detection
-- **Accessibility Features**: Simplified explanations and visual summaries for non-technical users
 - **ML-Based Anomaly Detection**: Machine learning algorithms to identify novel attack vectors and suspicious patterns
 - **Formal Verification**: Model checking, symbolic execution, and abstract interpretation for mathematical proof of correctness
 - **Advanced Static Analysis**: Control flow analysis, data flow analysis, and taint analysis
@@ -20,7 +18,6 @@ The **Smart Contract Auditor Agent** is an advanced AI-powered security analysis
 - **Professional Reports**: Generate detailed audit reports in markdown format
 - **Multi-Tool Analysis**: Contract analyzer, vulnerability checker, and gas optimizer tools
 - **Real-time Chat**: Interactive agent interface for contract analysis
-- **Developer Integrations**: VS Code extension, Hardhat plugin, and CLI tool for seamless workflow integration
 
 ### Security Features
 

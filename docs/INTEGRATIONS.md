@@ -2,7 +2,11 @@
 
 The Smart Contract Auditor Agent provides seamless integrations with popular development tools to enhance your workflow.
 
+<<<<<<< HEAD
 ##  Available Integrations
+=======
+## 🔌 Available Integrations
+>>>>>>> 9fe0422b6fd227d2cb8aa8feee97ce4b030971ab
 
 ### 1. VS Code Extension
 
@@ -112,7 +116,11 @@ sca health
 }
 ```
 
+<<<<<<< HEAD
 ##  Multi-Chain Analysis
+=======
+## 🌐 Multi-Chain Analysis
+>>>>>>> 9fe0422b6fd227d2cb8aa8feee97ce4b030971ab
 
 ### Supported Chains
 
@@ -165,7 +173,11 @@ console.log('Chain-specific issues:', result.chainSpecificIssues);
 console.log('Cross-chain compatible:', result.crossChainCompatibility.compatible);
 ```
 
+<<<<<<< HEAD
 ##  Accessibility Features
+=======
+## 👥 Accessibility Features
+>>>>>>> 9fe0422b6fd227d2cb8aa8feee97ce4b030971ab
 
 ### Simplified Reports
 
@@ -207,7 +219,11 @@ console.log('Action required:', accessibleReport.simplifiedSummary.actionRequire
 console.log('Security grade:', accessibleReport.visualSummary.securityGrade);
 ```
 
+<<<<<<< HEAD
 ##  Custom Integrations
+=======
+## 🔧 Custom Integrations
+>>>>>>> 9fe0422b6fd227d2cb8aa8feee97ce4b030971ab
 
 ### REST API Integration
 
@@ -254,7 +270,11 @@ app.post('/webhook/contract-deployed', async (req, res) => {
 });
 ```
 
+<<<<<<< HEAD
 ##  CI/CD Integration
+=======
+## 📊 CI/CD Integration
+>>>>>>> 9fe0422b6fd227d2cb8aa8feee97ce4b030971ab
 
 ### GitHub Actions
 
@@ -315,7 +335,11 @@ audit:
     expire_in: 1 week
 ```
 
+<<<<<<< HEAD
 ##  Best Practices
+=======
+## 🎯 Best Practices
+>>>>>>> 9fe0422b6fd227d2cb8aa8feee97ce4b030971ab
 
 ### Development Workflow
 

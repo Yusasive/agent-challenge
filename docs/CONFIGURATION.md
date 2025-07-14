@@ -2,7 +2,11 @@
 
 This document provides comprehensive information about configuring the Smart Contract Auditor Agent.
 
+<<<<<<< HEAD
 ##  Table of Contents
+=======
+## 📋 Table of Contents
+>>>>>>> 9fe0422b6fd227d2cb8aa8feee97ce4b030971ab
 
 - [Environment Variables](#environment-variables)
 - [Configuration Schema](#configuration-schema)
@@ -10,7 +14,11 @@ This document provides comprehensive information about configuring the Smart Con
 - [Advanced Configuration](#advanced-configuration)
 - [Validation and Troubleshooting](#validation-and-troubleshooting)
 
+<<<<<<< HEAD
 ##  Environment Variables
+=======
+## 🔧 Environment Variables
+>>>>>>> 9fe0422b6fd227d2cb8aa8feee97ce4b030971ab
 
 ### Core Configuration
 
@@ -74,7 +82,11 @@ ENABLE_CACHING=true                         # Enable result caching
 CACHE_TIMEOUT=300000                        # Cache timeout (5min)
 ```
 
+<<<<<<< HEAD
 ##  Configuration Schema
+=======
+## 📝 Configuration Schema
+>>>>>>> 9fe0422b6fd227d2cb8aa8feee97ce4b030971ab
 
 The configuration uses Zod for validation. Here's the complete schema:
 
@@ -130,7 +142,11 @@ const configSchema = z.object({
 });
 ```
 
+<<<<<<< HEAD
 ##  Environment-Specific Configs
+=======
+## 🌍 Environment-Specific Configs
+>>>>>>> 9fe0422b6fd227d2cb8aa8feee97ce4b030971ab
 
 ### Development Environment
 
@@ -182,7 +198,11 @@ ANALYSIS_TIMEOUT=30000
 MAX_CONCURRENT_ANALYSIS=1
 ```
 
+<<<<<<< HEAD
 ##  Advanced Configuration
+=======
+## ⚙️ Advanced Configuration
+>>>>>>> 9fe0422b6fd227d2cb8aa8feee97ce4b030971ab
 
 ### Custom Model Configuration
 
@@ -231,7 +251,11 @@ ML_SENSITIVITY=high                        # High sensitivity for ML detection
 VERIFICATION_TIMEOUT=300000                # 5-minute verification timeout
 ```
 
+<<<<<<< HEAD
 ## Validation and Troubleshooting
+=======
+## 🔍 Validation and Troubleshooting
+>>>>>>> 9fe0422b6fd227d2cb8aa8feee97ce4b030971ab
 
 ### Configuration Validation
 
@@ -251,30 +275,51 @@ This will check:
 #### 1. Invalid Timeout Values
 
 ```bash
+<<<<<<< HEAD
 #  Invalid - too short
 REQUEST_TIMEOUT=500
 
 #  Valid - minimum 1 second
+=======
+# ❌ Invalid - too short
+REQUEST_TIMEOUT=500
+
+# ✅ Valid - minimum 1 second
+>>>>>>> 9fe0422b6fd227d2cb8aa8feee97ce4b030971ab
 REQUEST_TIMEOUT=1000
 ```
 
 #### 2. Invalid Port Numbers
 
 ```bash
+<<<<<<< HEAD
 #  Invalid - port out of range
 PORT=70000
 
 #  Valid - standard port
+=======
+# ❌ Invalid - port out of range
+PORT=70000
+
+# ✅ Valid - standard port
+>>>>>>> 9fe0422b6fd227d2cb8aa8feee97ce4b030971ab
 PORT=8080
 ```
 
 #### 3. Invalid Analysis Depth
 
 ```bash
+<<<<<<< HEAD
 #  Invalid - unknown depth
 MAX_ANALYSIS_DEPTH=ultra
 
 #  Valid - supported depth
+=======
+# ❌ Invalid - unknown depth
+MAX_ANALYSIS_DEPTH=ultra
+
+# ✅ Valid - supported depth
+>>>>>>> 9fe0422b6fd227d2cb8aa8feee97ce4b030971ab
 MAX_ANALYSIS_DEPTH=deep
 ```
 
@@ -288,7 +333,11 @@ LOG_LEVEL=debug npm run dev
 
 Output will show:
 ```
+<<<<<<< HEAD
  Configuration loaded successfully:
+=======
+🔧 Configuration loaded successfully:
+>>>>>>> 9fe0422b6fd227d2cb8aa8feee97ce4b030971ab
   - Environment: development
   - Model: qwen2.5:1.5b
   - Port: 8080
@@ -328,7 +377,11 @@ import { getSecuritySetting } from './src/mastra/config/settings';
 const maxSize = getSecuritySetting('maxContractSize');
 ```
 
+<<<<<<< HEAD
 ##  Quick Configuration Examples
+=======
+## 🚀 Quick Configuration Examples
+>>>>>>> 9fe0422b6fd227d2cb8aa8feee97ce4b030971ab
 
 ### Minimal Configuration
 
